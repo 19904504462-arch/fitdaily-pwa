@@ -46,3 +46,8 @@ npm.cmd run dev
 V1 使用 `localStorage`，不需要登录，打开即可使用。适合原型测试。
 
 限制：换设备不会同步，清除浏览器数据后记录会丢失。正式版再接登录和云数据库。
+
+
+## 部署状态
+
+Pages 部署源：GitHub Actions
