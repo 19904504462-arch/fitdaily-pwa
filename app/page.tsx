@@ -1,6 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import benchPressImage from "./training-images/bench-press";
+import pecDeckImage from "./training-images/pec-deck";
+import cableFlyImage from "./training-images/cable-fly";
+import latPulldownImage from "./training-images/lat-pulldown";
+import seatedRowImage from "./training-images/seated-row";
+import chestSupportedRowImage from "./training-images/chest-supported-row";
+import legPressImage from "./training-images/leg-press";
+import squatImage from "./training-images/squat";
+import romanianDeadliftImage from "./training-images/romanian-deadlift";
+import shoulderPressImage from "./training-images/shoulder-press";
+import lateralRaiseImage from "./training-images/lateral-raise";
+import facePullImage from "./training-images/face-pull";
+
 
 type Tab = "home" | "train" | "calendar" | "food" | "profile";
 type ProfileView = "main" | "theme" | "equipment" | "data" | "install";
@@ -911,18 +924,18 @@ function NavItem({icon,label,active,onClick}:{icon:string;label:string;active:bo
 }
 function getExerciseImage(name:string) {
   const images:Record<string,string> = {
-    "杠铃卧推": "/images/training/chest/bench-press.webp",
-    "蝴蝶机夹胸": "/images/training/chest/pec-deck.webp",
-    "绳索夹胸": "/images/training/chest/cable-fly.webp",
-    "高位下拉": "/images/training/back/lat-pulldown.webp",
-    "坐姿绳索划船": "/images/training/back/seated-row.webp",
-    "胸托划船机": "/images/training/back/chest-supported-row.webp",
-    "坐姿腿举": "/images/training/legs/leg-press.webp",
-    "杠铃深蹲": "/images/training/legs/squat.webp",
-    "罗马尼亚硬拉": "/images/training/legs/romanian-deadlift.webp",
-    "坐姿哑铃推举": "/images/training/shoulders/shoulder-press.webp",
-    "哑铃侧平举": "/images/training/shoulders/lateral-raise.webp",
-    "绳索面拉": "/images/training/shoulders/face-pull.webp"
+    "杠铃卧推": benchPressImage,
+    "蝴蝶机夹胸": pecDeckImage,
+    "绳索夹胸": cableFlyImage,
+    "高位下拉": latPulldownImage,
+    "坐姿绳索划船": seatedRowImage,
+    "胸托划船机": chestSupportedRowImage,
+    "坐姿腿举": legPressImage,
+    "杠铃深蹲": squatImage,
+    "罗马尼亚硬拉": romanianDeadliftImage,
+    "坐姿哑铃推举": shoulderPressImage,
+    "哑铃侧平举": lateralRaiseImage,
+    "绳索面拉": facePullImage
   };
   return images[name] || null;
 }
