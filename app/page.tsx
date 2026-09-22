@@ -909,7 +909,21 @@ function SectionTitle({icon,title,action,onAction}:{icon:string;title:string;act
 function NavItem({icon,label,active,onClick}:{icon:string;label:string;active:boolean;onClick:()=>void}) {
   return <button className={active ? "nav active" : "nav"} onClick={onClick}><span>{icon}</span><small>{label}</small></button>
 }
-function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;onBack:()=>void;onRecord:(activity:TrainingActivity,action:TrainingActivity["actions"][number])=>void}) {
+function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;onBack:()=>void;onRecord:(activity:TrainingActivity,action:TrainingAction)=>void}) {
+  const [tutorial,setTutorial]=useState<TrainingAction | null>(null);
+  const professional = activity.actions.some(action => action.equipment);
+
+  if (tutorial) {
+    return (
+      <ExerciseTutorial
+        activity={activity}
+        action={tutorial}
+        onBack={() => setTutorial(null)}
+        onRecord={() => onRecord(activity, tutorial)}
+      />
+    );
+  }
+
   return (
     <div className="training-detail">
       <button className="back-button" onClick={onBack}>← 返回</button>
@@ -921,16 +935,32 @@ function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;on
         </div>
       </div>
 
+      {professional && (
+        <div className="white-card evidence-card">
+          <div className="evidence-title"><span>📚</span><b>训练方法参考</b></div>
+          <div className="evidence-grid">
+            <div><b>入门</b><span>先学动作，选择能规范完成约 12–15 次的重量。</span></div>
+            <div><b>力量</b><span>复合动作优先；重负荷训练常用 2–3 组并保证充分休息。</span></div>
+            <div><b>增肌</b><span>更看重每周总训练量，可逐步累积到约 10+ 组/肌群/周。</span></div>
+          </div>
+          <p>主要肌群至少每周训练 2 次；动作质量和持续执行比复杂技巧更重要。</p>
+        </div>
+      )}
+
       <div className="training-action-list">
         {activity.actions.map((action, index) => (
-          <div className="white-card training-action-card" key={action.name}>
+          <div className="white-card training-action-card professional-action" key={action.name}>
             <div className="action-index">{String(index + 1).padStart(2,"0")}</div>
             <div className="action-copy">
               <b>{action.name}</b>
               <span className="action-dose">{action.dose}</span>
+              {action.equipment && <span className="action-equipment">器械：{action.equipment}</span>}
               <p>{action.cue}</p>
             </div>
-            <button onClick={() => onRecord(activity, action)}>记录</button>
+            <div className="action-buttons">
+              {action.equipment && <button className="tutorial-btn" onClick={() => setTutorial(action)}>教程</button>}
+              <button className="record-btn" onClick={() => onRecord(activity, action)}>记录</button>
+            </div>
           </div>
         ))}
       </div>
@@ -942,6 +972,85 @@ function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;on
         + 记录一次{activity.name}
       </button>
     </div>
+  );
+}
+
+function ExerciseTutorial({
+  activity,action,onBack,onRecord
+}:{
+  activity:TrainingActivity;
+  action:TrainingAction;
+  onBack:()=>void;
+  onRecord:()=>void;
+}) {
+  return (
+    <div className="exercise-tutorial">
+      <button className="back-button" onClick={onBack}>← 返回{activity.name}</button>
+
+      <div className="tutorial-heading">
+        <div className="training-detail-icon">{activity.icon}</div>
+        <div>
+          <span className="tutorial-kicker">动作教程</span>
+          <h2>{action.name}</h2>
+          <p>{action.target || activity.desc}</p>
+        </div>
+      </div>
+
+      <div className="tutorial-meta">
+        <div><span>器械</span><b>{action.equipment || "按实际情况"}</b></div>
+        <div><span>难度</span><b>{action.level || "一般"}</b></div>
+        <div><span>建议训练</span><b>{action.dose}</b></div>
+        <div><span>组间休息</span><b>{action.rest || "按状态调整"}</b></div>
+      </div>
+
+      {action.setup?.length ? (
+        <TutorialSection icon="⚙️" title="器械怎么设置">
+          <ol>{action.setup.map((item,i)=><li key={i}>{item}</li>)}</ol>
+          <p className="machine-note">不同品牌器械结构可能不同，座椅、滑轮和限位位置应以设备铭牌与现场说明为准。</p>
+        </TutorialSection>
+      ) : null}
+
+      {action.steps?.length ? (
+        <TutorialSection icon="▶️" title="动作步骤">
+          <ol className="numbered-steps">{action.steps.map((item,i)=><li key={i}><span>{i+1}</span><p>{item}</p></li>)}</ol>
+        </TutorialSection>
+      ) : null}
+
+      <TutorialSection icon="🎯" title="训练要点">
+        <div className="cue-box">{action.cue}</div>
+        <div className="method-row"><span>建议训练量</span><b>{action.dose}</b></div>
+        <div className="method-row"><span>组间休息</span><b>{action.rest || "按训练目标调整"}</b></div>
+        {action.progression && <div className="progression-box"><b>如何进阶</b><p>{action.progression}</p></div>}
+      </TutorialSection>
+
+      {action.mistakes?.length ? (
+        <TutorialSection icon="⚠️" title="常见错误">
+          <ul className="mistake-list">{action.mistakes.map((item,i)=><li key={i}>{item}</li>)}</ul>
+        </TutorialSection>
+      ) : null}
+
+      {action.sourceName && action.sourceUrl && (
+        <a className="source-card white-card" href={action.sourceUrl} target="_blank" rel="noreferrer">
+          <div><span>专业参考来源</span><b>{action.sourceName}</b></div>
+          <strong>↗</strong>
+        </a>
+      )}
+
+      <div className="tutorial-safety">
+        出现尖锐疼痛、明显关节不适或无法保持动作控制时应停止该动作；有既往损伤或特殊健康情况时，先咨询合格的医疗或健身专业人员。
+      </div>
+
+      <button className="primary-action" onClick={onRecord}>✓ 记录这次训练</button>
+    </div>
+  );
+}
+
+function TutorialSection({icon,title,children}:{icon:string;title:string;children:React.ReactNode}) {
+  return (
+    <section className="white-card tutorial-section">
+      <h3><span>{icon}</span>{title}</h3>
+      {children}
+    </section>
   );
 }
 
