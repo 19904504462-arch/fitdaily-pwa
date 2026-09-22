@@ -259,3 +259,97 @@ button{cursor:pointer}
   .photo-grid{grid-template-columns:1fr}
   .equipment-photo .photo-frame{aspect-ratio:16/9}
 }
+
+/* 训练部位二级页：器材照片卡片 */
+.equipment-photo-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.equipment-photo-card{
+  border:1px solid var(--pink-line);
+  border-radius:20px;
+  padding:0;
+  overflow:hidden;
+  background:#fff;
+  color:var(--text);
+  text-align:left;
+  box-shadow:var(--shadow);
+}
+.equipment-card-media{
+  position:relative;
+  aspect-ratio:4/3;
+  overflow:hidden;
+  background:var(--pink-soft);
+}
+.equipment-card-media img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  transition:transform .2s ease;
+}
+.equipment-photo-card:active .equipment-card-media img{
+  transform:scale(.985);
+}
+.equipment-card-placeholder{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:8px;
+  color:var(--muted);
+}
+.equipment-card-placeholder span{font-size:34px}
+.equipment-card-placeholder small{font-size:9px}
+.equipment-card-badge{
+  position:absolute;
+  right:8px;
+  bottom:8px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.92);
+  color:var(--pink);
+  font-size:9px;
+  font-weight:900;
+  backdrop-filter:blur(5px);
+}
+.equipment-card-copy{
+  padding:11px 11px 12px;
+  display:grid;
+  gap:3px;
+}
+.equipment-card-copy b{
+  font-size:13px;
+}
+.equipment-card-copy span{
+  font-size:9px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.equipment-card-copy small{
+  font-size:10px;
+  color:var(--pink);
+  font-weight:800;
+}
+.exercise-photo-single{
+  position:relative;
+  width:100%;
+  aspect-ratio:4/3;
+  overflow:hidden;
+  background:var(--pink-soft);
+  border-bottom:1px solid var(--pink-line);
+}
+.exercise-photo-single img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+@media(max-width:360px){
+  .equipment-photo-grid{grid-template-columns:1fr}
+}
