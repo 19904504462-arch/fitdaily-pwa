@@ -4,6 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 
 type Tab = "home" | "train" | "calendar" | "food" | "profile";
 type ProfileView = "main" | "theme" | "equipment" | "data" | "install";
+type TrainCategory = "strength" | "sport";
+
+type TrainingActivity = {
+  id: string;
+  name: string;
+  icon: string;
+  desc: string;
+  actions: { name: string; dose: string; cue: string }[];
+};
 type Checkin = {
   date: string;
   minutes: number;
@@ -34,11 +43,90 @@ const themePresets = [
   { id: "sky", name: "晴空蓝", accent: "#5f9eea", accent2: "#83b7f2", background: "#f4f9ff", soft: "#eaf4ff" },
   { id: "mono", name: "奶油灰", accent: "#66636d", accent2: "#89858f", background: "#f8f7f5", soft: "#f0eeeb" },
 ] as const;
-const bodyParts = [
-  ["胸部", "🏋️"], ["背部", "🧍"], ["腿部", "🦵"],
-  ["肩部", "🙋"], ["手臂", "💪"], ["核心", "🧘"],
-  ["臀部", "🍑"], ["全身", "🤸"], ["有氧", "🏃"],
-] as const;
+
+const strengthActivities: TrainingActivity[] = [
+  { id:"chest", name:"胸部", icon:"🏋️", desc:"推类力量训练", actions:[
+    { name:"杠铃卧推", dose:"4组 × 6–8次", cue:"肩胛稳定、双脚踩稳，优先保证动作控制。" },
+    { name:"上斜哑铃卧推", dose:"3组 × 8–10次", cue:"凳面保持适中角度，感受胸上部发力。" },
+    { name:"器械夹胸", dose:"3组 × 10–15次", cue:"动作末端停顿，不要用惯性甩动。" }
+  ]},
+  { id:"back", name:"背部", icon:"🧍", desc:"背阔肌与中上背", actions:[
+    { name:"高位下拉", dose:"4组 × 8–10次", cue:"肘向下带动，避免只用手臂拉。" },
+    { name:"坐姿划船", dose:"3组 × 8–12次", cue:"躯干稳定，把肘向身体后侧带。" },
+    { name:"单臂哑铃划船", dose:"3组 × 10次", cue:"保持脊柱稳定，控制回程。" }
+  ]},
+  { id:"legs", name:"腿部", icon:"🦵", desc:"下肢力量训练", actions:[
+    { name:"深蹲", dose:"4组 × 6–8次", cue:"膝盖方向与脚尖一致，保持躯干稳定。" },
+    { name:"腿举", dose:"4组 × 10次", cue:"控制下放，不要在顶端猛烈锁膝。" },
+    { name:"罗马尼亚硬拉", dose:"3组 × 8–10次", cue:"髋部向后移动，感受腿后侧拉伸。" }
+  ]},
+  { id:"shoulders", name:"肩部", icon:"🙋", desc:"肩部稳定与围度", actions:[
+    { name:"哑铃推举", dose:"3组 × 8–10次", cue:"保持核心稳定，避免腰部过度后仰。" },
+    { name:"哑铃侧平举", dose:"4组 × 12–15次", cue:"重量不必过大，避免耸肩借力。" },
+    { name:"绳索面拉", dose:"3组 × 12–15次", cue:"肘部向外，感受后束和肩胛参与。" }
+  ]},
+  { id:"arms", name:"手臂", icon:"💪", desc:"肱二头与肱三头", actions:[
+    { name:"哑铃弯举", dose:"3组 × 10–12次", cue:"固定上臂，减少身体摆动。" },
+    { name:"绳索下压", dose:"3组 × 10–12次", cue:"肘部贴近身体，控制回程。" },
+    { name:"锤式弯举", dose:"3组 × 10次", cue:"手腕保持中立，避免甩动。" }
+  ]},
+  { id:"core", name:"核心", icon:"🧘", desc:"核心稳定训练", actions:[
+    { name:"平板支撑", dose:"3组 × 30–60秒", cue:"保持身体一条直线，不塌腰。" },
+    { name:"死虫", dose:"3组 × 10次/侧", cue:"腰背保持稳定贴地，动作放慢。" },
+    { name:"卷腹", dose:"3组 × 12–15次", cue:"避免颈部发力，控制躯干卷起。" }
+  ]},
+  { id:"glutes", name:"臀部", icon:"🍑", desc:"臀腿后侧训练", actions:[
+    { name:"臀桥", dose:"4组 × 10–12次", cue:"顶端夹紧臀部，不要过度顶腰。" },
+    { name:"保加利亚分腿蹲", dose:"3组 × 8–10次/侧", cue:"前脚踩稳，保持膝盖轨迹。" },
+    { name:"绳索后踢", dose:"3组 × 12次/侧", cue:"骨盆保持稳定，避免身体大幅前倾。" }
+  ]},
+  { id:"fullbody", name:"全身", icon:"🤸", desc:"全身综合训练", actions:[
+    { name:"壶铃摆动", dose:"4组 × 15次", cue:"以髋伸发力，不要只用手臂抬起。" },
+    { name:"深蹲推举", dose:"3组 × 10次", cue:"先稳定下肢，再顺势完成推举。" },
+    { name:"农夫行走", dose:"4组 × 30–45秒", cue:"保持躯干直立和稳定呼吸。" }
+  ]},
+  { id:"cardio", name:"有氧", icon:"🏃", desc:"器械心肺训练", actions:[
+    { name:"坡度快走", dose:"25–40分钟", cue:"保持可持续节奏，不必追求过高速度。" },
+    { name:"椭圆机", dose:"20–35分钟", cue:"保持动作连贯，控制呼吸。" },
+    { name:"划船机", dose:"15–25分钟", cue:"先蹬腿再拉手，避免只靠上肢。" }
+  ]}
+];
+
+const sportActivities: TrainingActivity[] = [
+  { id:"swimming", name:"游泳", icon:"🏊", desc:"心肺 · 全身协调", actions:[
+    { name:"自由泳", dose:"20–30分钟", cue:"保持均匀呼吸和稳定节奏，优先动作质量。" },
+    { name:"蛙泳", dose:"20–30分钟", cue:"注意蹬夹水节奏，避免膝关节过度外翻。" },
+    { name:"打腿练习", dose:"6–10组 × 25米", cue:"专注身体流线与脚踝放松。" },
+    { name:"间歇游", dose:"8组 × 50米", cue:"组间充分恢复，速度以可控为主。" }
+  ]},
+  { id:"badminton", name:"羽毛球", icon:"🏸", desc:"灵敏 · 爆发 · 心肺", actions:[
+    { name:"多球步伐", dose:"6组 × 45秒", cue:"保持重心稳定，先到位再击球。" },
+    { name:"高远球练习", dose:"10–15分钟", cue:"注意转体和挥拍连贯，不只用手臂发力。" },
+    { name:"网前搓放", dose:"10分钟", cue:"控制拍面，动作轻柔，减少大幅挥拍。" },
+    { name:"实战对打", dose:"30–45分钟", cue:"以节奏和落点为主，疲劳后降低强度。" }
+  ]},
+  { id:"running", name:"跑步", icon:"🏃", desc:"耐力 · 心肺", actions:[
+    { name:"轻松跑", dose:"30–45分钟", cue:"以能正常交流的强度为主。" },
+    { name:"节奏跑", dose:"20–30分钟", cue:"强度略高但保持稳定，不做全力冲刺。" },
+    { name:"间歇跑", dose:"6组 × 2分钟", cue:"快段与恢复段交替，逐步增加训练量。" }
+  ]},
+  { id:"cycling", name:"骑行", icon:"🚴", desc:"低冲击耐力训练", actions:[
+    { name:"轻松骑", dose:"40–60分钟", cue:"保持顺畅踏频，避免一开始阻力过大。" },
+    { name:"耐力骑", dose:"60–90分钟", cue:"补充水分，保持稳定功率和节奏。" },
+    { name:"间歇骑", dose:"6组 × 3分钟", cue:"快慢交替，恢复段充分放松。" }
+  ]},
+  { id:"rope", name:"跳绳", icon:"🪢", desc:"协调 · 心肺 · 小腿", actions:[
+    { name:"基础双脚跳", dose:"8组 × 1分钟", cue:"小幅弹跳，落地轻柔。" },
+    { name:"间歇跳绳", dose:"10轮 40秒/20秒", cue:"逐步提高节奏，不追求一次性极限。" },
+    { name:"双摇练习", dose:"5–8组 × 技术练习", cue:"先稳定基础跳，再增加手腕转速。" }
+  ]},
+  { id:"yoga", name:"瑜伽拉伸", icon:"🧘", desc:"恢复 · 柔韧 · 放松", actions:[
+    { name:"流瑜伽", dose:"20–30分钟", cue:"动作与呼吸配合，以舒适范围为主。" },
+    { name:"髋部拉伸", dose:"10–15分钟", cue:"避免弹震式拉伸，缓慢进入幅度。" },
+    { name:"肩背放松", dose:"10分钟", cue:"保持均匀呼吸，不强行压到疼痛范围。" }
+  ]}
+];
+
 
 const equipment = [
   { name: "杠铃卧推", icon: "🏋️", tip: "肩胛稳定、双脚踩稳，大重量时设置保护杆或找保护者。" },
@@ -78,6 +166,8 @@ export default function Home() {
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
   const [profileView, setProfileView] = useState<ProfileView>("main");
+  const [trainCategory, setTrainCategory] = useState<TrainCategory>("strength");
+  const [trainDetail, setTrainDetail] = useState<string | null>(null);
   const [minutes, setMinutes] = useState(45);
   const [moves, setMoves] = useState(5);
   const [note, setNote] = useState("");
@@ -257,25 +347,64 @@ export default function Home() {
 
         {tab === "train" && (
           <>
-            <div className="page-heading">
-              <h2>今天练哪里呀？</h2>
-              <p>可以多选部位，选好后开始训练</p>
-            </div>
-            <div className="part-grid">
-              {bodyParts.map(([name, icon]) => (
+            {!trainDetail ? (
+              <>
+                <div className="page-heading">
+                  <h2>今天练什么？</h2>
+                  <p>先选训练类型，再进入具体动作页面</p>
+                </div>
+
+                <div className="train-segment">
+                  <button
+                    className={trainCategory === "strength" ? "active" : ""}
+                    onClick={() => setTrainCategory("strength")}
+                  >
+                    💪 力量训练
+                  </button>
+                  <button
+                    className={trainCategory === "sport" ? "active" : ""}
+                    onClick={() => setTrainCategory("sport")}
+                  >
+                    🏊 其他运动
+                  </button>
+                </div>
+
+                <div className="part-grid">
+                  {(trainCategory === "strength" ? strengthActivities : sportActivities).map(activity => (
+                    <button
+                      key={activity.id}
+                      className="part-card activity-entry"
+                      onClick={() => setTrainDetail(activity.id)}
+                    >
+                      <span className="part-icon">{activity.icon}</span>
+                      <b>{activity.name}</b>
+                      <small>{activity.desc}</small>
+                    </button>
+                  ))}
+                </div>
+
                 <button
-                  key={name}
-                  className={`part-card ${state.selectedParts.includes(name) ? "selected" : ""}`}
-                  onClick={() => togglePart(name)}
+                  className="secondary-action"
+                  onClick={() => {
+                    setState(s => ({...s, selectedParts: []}));
+                    setNote("自由训练");
+                    setShowLog(true);
+                  }}
                 >
-                  <span className="part-icon">{icon}</span>
-                  <b>{name}</b>
+                  ⚡ 自由训练
                 </button>
-              ))}
-            </div>
-            <div className="selected-bar">已选：{state.selectedParts.length ? state.selectedParts.join("、") : "自由训练"}</div>
-            <button className="primary-action" onClick={() => setShowLog(true)}>💪 开始训练（{state.selectedParts.length}）</button>
-            <button className="secondary-action" onClick={() => { setState(s => ({...s, selectedParts: []})); setShowLog(true); }}>⚡ 自由训练</button>
+              </>
+            ) : (
+              <TrainingDetail
+                activity={[...strengthActivities, ...sportActivities].find(x => x.id === trainDetail)!}
+                onBack={() => setTrainDetail(null)}
+                onRecord={(activity, action) => {
+                  setState(s => ({ ...s, selectedParts: [activity.name] }));
+                  setNote(`${action.name} · ${action.dose}`);
+                  setShowLog(true);
+                }}
+              />
+            )}
           </>
         )}
 
@@ -473,7 +602,7 @@ export default function Home() {
 
       <nav className="bottom-nav">
         <NavItem icon="⌂" label="首页" active={tab === "home"} onClick={() => setTab("home")} />
-        <NavItem icon="💪" label="训练" active={tab === "train"} onClick={() => setTab("train")} />
+        <NavItem icon="💪" label="训练" active={tab === "train"} onClick={() => { setTab("train"); setTrainDetail(null); }} />
         <NavItem icon="▦" label="日程" active={tab === "calendar"} onClick={() => setTab("calendar")} />
         <NavItem icon="🍜" label="饮食" active={tab === "food"} onClick={() => setTab("food")} />
         <NavItem icon="♡" label="我的" active={tab === "profile"} onClick={() => { setTab("profile"); setProfileView("main"); }} />
@@ -529,6 +658,42 @@ function SectionTitle({icon,title,action,onAction}:{icon:string;title:string;act
 function NavItem({icon,label,active,onClick}:{icon:string;label:string;active:boolean;onClick:()=>void}) {
   return <button className={active ? "nav active" : "nav"} onClick={onClick}><span>{icon}</span><small>{label}</small></button>
 }
+function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;onBack:()=>void;onRecord:(activity:TrainingActivity,action:TrainingActivity["actions"][number])=>void}) {
+  return (
+    <div className="training-detail">
+      <button className="back-button" onClick={onBack}>← 返回</button>
+      <div className="training-detail-head">
+        <div className="training-detail-icon">{activity.icon}</div>
+        <div>
+          <h2>{activity.name}</h2>
+          <p>{activity.desc}</p>
+        </div>
+      </div>
+
+      <div className="training-action-list">
+        {activity.actions.map((action, index) => (
+          <div className="white-card training-action-card" key={action.name}>
+            <div className="action-index">{String(index + 1).padStart(2,"0")}</div>
+            <div className="action-copy">
+              <b>{action.name}</b>
+              <span className="action-dose">{action.dose}</span>
+              <p>{action.cue}</p>
+            </div>
+            <button onClick={() => onRecord(activity, action)}>记录</button>
+          </div>
+        ))}
+      </div>
+
+      <button
+        className="secondary-action"
+        onClick={() => onRecord(activity, { name: "自由练习", dose: "按实际完成", cue: "" })}
+      >
+        + 记录一次{activity.name}
+      </button>
+    </div>
+  );
+}
+
 function ProfileMenuItem({icon,title,desc,onClick}:{icon:string;title:string;desc:string;onClick:()=>void}) {
   return (
     <button className="profile-menu-item white-card" onClick={onClick}>
