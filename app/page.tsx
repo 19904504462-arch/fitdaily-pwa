@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 type Tab = "home" | "train" | "calendar" | "food" | "profile";
+type ProfileView = "main" | "theme" | "equipment" | "data" | "install";
 type Checkin = {
   date: string;
   minutes: number;
@@ -76,6 +77,7 @@ export default function Home() {
   const [showFood, setShowFood] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
+  const [profileView, setProfileView] = useState<ProfileView>("main");
   const [minutes, setMinutes] = useState(45);
   const [moves, setMoves] = useState(5);
   const [note, setNote] = useState("");
@@ -203,10 +205,7 @@ export default function Home() {
             <h1>FitDaily</h1>
           </div>
         </div>
-        <div className="top-actions">
-          <button className="theme-quick" onClick={() => setShowTheme(true)} aria-label="主题设置">🎨</button>
-          <button className="streak" onClick={() => setTab("calendar")}>🔥 {streak}天</button>
-        </div>
+        <button className="streak" onClick={() => setTab("calendar")}>🔥 {streak}天</button>
       </header>
 
       <section className="screen">
@@ -316,84 +315,160 @@ export default function Home() {
 
         {tab === "profile" && (
           <>
-            <div className="page-heading left">
-              <h2>我的 FitDaily</h2>
-              <p>安装、器械指南和本地数据管理都放在这里。</p>
-            </div>
+            {profileView === "main" && (
+              <>
+                <div className="page-heading left">
+                  <h2>我的 FitDaily</h2>
+                  <p>这里仅保留功能入口，具体设置进入独立页面。</p>
+                </div>
 
-            <button className="install-card white-card" onClick={installApp}>
-              <div className="circle-icon">📲</div>
-              <div><b>添加到手机桌面</b><span>安装后打开更像原生 App</span></div>
-              <strong>›</strong>
-            </button>
+                <div className="profile-menu">
+                  <ProfileMenuItem
+                    icon="🎨"
+                    title="主题与背景"
+                    desc="配色、背景颜色与个性化"
+                    onClick={() => setProfileView("theme")}
+                  />
+                  <ProfileMenuItem
+                    icon="🏋️"
+                    title="器械指南"
+                    desc="常用器械使用方法与动作提示"
+                    onClick={() => setProfileView("equipment")}
+                  />
+                  <ProfileMenuItem
+                    icon="📲"
+                    title="添加到手机桌面"
+                    desc="把 FitDaily 安装成类似 App 的体验"
+                    onClick={() => setProfileView("install")}
+                  />
+                  <ProfileMenuItem
+                    icon="💾"
+                    title="数据管理"
+                    desc="查看当前数据保存方式与注意事项"
+                    onClick={() => setProfileView("data")}
+                  />
+                </div>
+              </>
+            )}
 
-            <SectionTitle icon="🎨" title="主题与背景" />
-            <div className="white-card theme-panel">
-              <div className="theme-copy">
-                <b>快速主题</b>
-                <span>选择一套配色，或单独自定义页面背景。</span>
-              </div>
-              <div className="theme-presets">
-                {themePresets.map(theme => (
+            {profileView === "theme" && (
+              <ProfileSubpage
+                icon="🎨"
+                title="主题与背景"
+                subtitle="选择喜欢的配色，也可以单独自定义背景。"
+                onBack={() => setProfileView("main")}
+              >
+                <div className="white-card theme-panel subpage-card">
+                  <div className="theme-copy">
+                    <b>快速主题</b>
+                    <span>点击主题后立即应用，并自动保存。</span>
+                  </div>
+                  <div className="theme-presets">
+                    {themePresets.map(theme => (
+                      <button
+                        key={theme.id}
+                        className={`theme-option ${state.theme.preset === theme.id ? "active" : ""}`}
+                        onClick={() => setState(s => ({
+                          ...s,
+                          theme: { preset: theme.id, background: theme.background }
+                        }))}
+                        aria-label={theme.name}
+                        title={theme.name}
+                      >
+                        <span className="theme-swatch" style={{ background: theme.accent }} />
+                        <small>{theme.name}</small>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="custom-bg-row">
+                    <div>
+                      <b>自定义背景</b>
+                      <span>点击右侧色块选择任意颜色</span>
+                    </div>
+                    <label className="color-picker-wrap">
+                      <input
+                        type="color"
+                        value={state.theme.background}
+                        onChange={e => setState(s => ({
+                          ...s,
+                          theme: { ...s.theme, background: e.target.value }
+                        }))}
+                      />
+                      <span style={{ background: state.theme.background }} />
+                    </label>
+                  </div>
                   <button
-                    key={theme.id}
-                    className={`theme-option ${state.theme.preset === theme.id ? "active" : ""}`}
+                    className="reset-theme"
                     onClick={() => setState(s => ({
                       ...s,
-                      theme: { preset: theme.id, background: theme.background }
+                      theme: { ...initialState.theme }
                     }))}
-                    aria-label={theme.name}
-                    title={theme.name}
                   >
-                    <span className="theme-swatch" style={{ background: theme.accent }} />
-                    <small>{theme.name}</small>
+                    恢复默认粉色
                   </button>
-                ))}
-              </div>
-              <div className="custom-bg-row">
-                <div>
-                  <b>自定义背景</b>
-                  <span>点击色块选择任意颜色</span>
                 </div>
-                <label className="color-picker-wrap">
-                  <input
-                    type="color"
-                    value={state.theme.background}
-                    onChange={e => setState(s => ({
-                      ...s,
-                      theme: { ...s.theme, background: e.target.value }
-                    }))}
-                  />
-                  <span style={{ background: state.theme.background }} />
-                </label>
-              </div>
-              <button
-                className="reset-theme"
-                onClick={() => setState(s => ({
-                  ...s,
-                  theme: { ...initialState.theme }
-                }))}
+              </ProfileSubpage>
+            )}
+
+            {profileView === "equipment" && (
+              <ProfileSubpage
+                icon="🏋️"
+                title="器械指南"
+                subtitle="常用器械单独放在这里，不占用“我的”首页。"
+                onBack={() => setProfileView("main")}
               >
-                恢复默认粉色
-              </button>
-            </div>
-
-            <SectionTitle icon="🏋️" title="常用器械指南" />
-            <div className="equipment-list">
-              {equipment.map(x => (
-                <div className="white-card equipment-row" key={x.name}>
-                  <div className="circle-icon">{x.icon}</div>
-                  <div><b>{x.name}</b><span>{x.tip}</span></div>
+                <div className="equipment-list subpage-list">
+                  {equipment.map(x => (
+                    <div className="white-card equipment-row" key={x.name}>
+                      <div className="circle-icon">{x.icon}</div>
+                      <div><b>{x.name}</b><span>{x.tip}</span></div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </ProfileSubpage>
+            )}
 
-            <SectionTitle icon="💾" title="数据说明" />
-            <div className="white-card data-note">
-              当前 V1 数据保存在本机浏览器。适合快速试用；正式给多人长期使用时，再接登录和云数据库。
-            </div>
+            {profileView === "install" && (
+              <ProfileSubpage
+                icon="📲"
+                title="添加到手机桌面"
+                subtitle="不同设备安装方式不同，点击下方按钮尝试直接安装。"
+                onBack={() => setProfileView("main")}
+              >
+                <div className="white-card install-detail subpage-card">
+                  <div className="install-hero">📱</div>
+                  <b>把 FitDaily 放到手机桌面</b>
+                  <p>安装后可从桌面图标直接打开，显示效果更接近独立 App。</p>
+                  <button className="primary-action compact" onClick={installApp}>尝试安装</button>
+                  <div className="install-steps">
+                    <b>iPhone / Safari</b>
+                    <span>分享 → 添加到主屏幕</span>
+                    <b>Android / Chrome、Edge</b>
+                    <span>浏览器菜单 → 安装应用 / 添加到主屏幕</span>
+                  </div>
+                </div>
+              </ProfileSubpage>
+            )}
+
+            {profileView === "data" && (
+              <ProfileSubpage
+                icon="💾"
+                title="数据管理"
+                subtitle="当前仍然是快速试用阶段，数据保存在本机浏览器。"
+                onBack={() => setProfileView("main")}
+              >
+                <div className="white-card data-detail subpage-card">
+                  <div className="data-status-row"><span>当前模式</span><b>本地保存</b></div>
+                  <div className="data-status-row"><span>是否需要账号</span><b>不需要</b></div>
+                  <div className="data-status-row"><span>换设备同步</span><b>暂不支持</b></div>
+                  <div className="data-status-row"><span>清缓存后保留</span><b>不能保证</b></div>
+                  <p>等功能稳定并准备给多人长期使用时，再接登录与云数据库。</p>
+                </div>
+              </ProfileSubpage>
+            )}
           </>
         )}
+
       </section>
 
       <nav className="bottom-nav">
@@ -401,7 +476,7 @@ export default function Home() {
         <NavItem icon="💪" label="训练" active={tab === "train"} onClick={() => setTab("train")} />
         <NavItem icon="▦" label="日程" active={tab === "calendar"} onClick={() => setTab("calendar")} />
         <NavItem icon="🍜" label="饮食" active={tab === "food"} onClick={() => setTab("food")} />
-        <NavItem icon="♡" label="我的" active={tab === "profile"} onClick={() => setTab("profile")} />
+        <NavItem icon="♡" label="我的" active={tab === "profile"} onClick={() => { setTab("profile"); setProfileView("main"); }} />
       </nav>
 
       {showLog && (
@@ -427,49 +502,6 @@ export default function Home() {
         </Sheet>
       )}
 
-
-      {showTheme && (
-        <Sheet title="主题与背景" subtitle="选择喜欢的主题，也可以自定义背景颜色" onClose={() => setShowTheme(false)}>
-          <div className="theme-presets sheet-themes">
-            {themePresets.map(theme => (
-              <button
-                key={theme.id}
-                className={`theme-option ${state.theme.preset === theme.id ? "active" : ""}`}
-                onClick={() => setState(s => ({
-                  ...s,
-                  theme: { preset: theme.id, background: theme.background }
-                }))}
-              >
-                <span className="theme-swatch" style={{ background: theme.accent }} />
-                <small>{theme.name}</small>
-              </button>
-            ))}
-          </div>
-          <div className="custom-bg-row sheet-custom-bg">
-            <div>
-              <b>自定义背景</b>
-              <span>点击右侧色块选择任意颜色</span>
-            </div>
-            <label className="color-picker-wrap">
-              <input
-                type="color"
-                value={state.theme.background}
-                onChange={e => setState(s => ({
-                  ...s,
-                  theme: { ...s.theme, background: e.target.value }
-                }))}
-              />
-              <span style={{ background: state.theme.background }} />
-            </label>
-          </div>
-          <button
-            className="reset-theme"
-            onClick={() => setState(s => ({ ...s, theme: { ...initialState.theme } }))}
-          >
-            恢复默认粉色
-          </button>
-        </Sheet>
-      )}
 
       {showInstallHelp && (
         <Sheet title="添加到桌面" subtitle="不同手机操作略有不同" onClose={() => setShowInstallHelp(false)}>
@@ -497,6 +529,29 @@ function SectionTitle({icon,title,action,onAction}:{icon:string;title:string;act
 function NavItem({icon,label,active,onClick}:{icon:string;label:string;active:boolean;onClick:()=>void}) {
   return <button className={active ? "nav active" : "nav"} onClick={onClick}><span>{icon}</span><small>{label}</small></button>
 }
+function ProfileMenuItem({icon,title,desc,onClick}:{icon:string;title:string;desc:string;onClick:()=>void}) {
+  return (
+    <button className="profile-menu-item white-card" onClick={onClick}>
+      <div className="circle-icon">{icon}</div>
+      <div className="profile-menu-copy"><b>{title}</b><span>{desc}</span></div>
+      <strong className="profile-chevron">›</strong>
+    </button>
+  );
+}
+
+function ProfileSubpage({icon,title,subtitle,onBack,children}:{icon:string;title:string;subtitle:string;onBack:()=>void;children:React.ReactNode}) {
+  return (
+    <div className="profile-subpage">
+      <button className="back-button" onClick={onBack}>← 返回</button>
+      <div className="subpage-heading">
+        <span>{icon}</span>
+        <div><h2>{title}</h2><p>{subtitle}</p></div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function Sheet({title,subtitle,onClose,children}:{title:string;subtitle:string;onClose:()=>void;children:React.ReactNode}) {
   return <div className="sheet-backdrop" onClick={onClose}>
     <div className="sheet" onClick={e=>e.stopPropagation()}>
