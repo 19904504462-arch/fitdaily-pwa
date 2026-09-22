@@ -909,9 +909,26 @@ function SectionTitle({icon,title,action,onAction}:{icon:string;title:string;act
 function NavItem({icon,label,active,onClick}:{icon:string;label:string;active:boolean;onClick:()=>void}) {
   return <button className={active ? "nav active" : "nav"} onClick={onClick}><span>{icon}</span><small>{label}</small></button>
 }
+function getExerciseImage(name:string) {
+  const images:Record<string,string> = {
+    "杠铃卧推": "/images/training/chest/bench-press.webp",
+    "蝴蝶机夹胸": "/images/training/chest/pec-deck.webp",
+    "绳索夹胸": "/images/training/chest/cable-fly.webp",
+    "高位下拉": "/images/training/back/lat-pulldown.webp",
+    "坐姿绳索划船": "/images/training/back/seated-row.webp",
+    "胸托划船机": "/images/training/back/chest-supported-row.webp",
+    "坐姿腿举": "/images/training/legs/leg-press.webp",
+    "杠铃深蹲": "/images/training/legs/squat.webp",
+    "罗马尼亚硬拉": "/images/training/legs/romanian-deadlift.webp",
+    "坐姿哑铃推举": "/images/training/shoulders/shoulder-press.webp",
+    "哑铃侧平举": "/images/training/shoulders/lateral-raise.webp",
+    "绳索面拉": "/images/training/shoulders/face-pull.webp"
+  };
+  return images[name] || null;
+}
+
 function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;onBack:()=>void;onRecord:(activity:TrainingActivity,action:TrainingAction)=>void}) {
   const [tutorial,setTutorial]=useState<TrainingAction | null>(null);
-  const professional = activity.actions.some(action => action.equipment);
 
   if (tutorial) {
     return (
@@ -927,42 +944,43 @@ function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;on
   return (
     <div className="training-detail">
       <button className="back-button" onClick={onBack}>← 返回</button>
+
       <div className="training-detail-head">
         <div className="training-detail-icon">{activity.icon}</div>
         <div>
           <h2>{activity.name}</h2>
-          <p>{activity.desc}</p>
+          <p>选择器材 / 动作，点击照片查看使用姿势和训练方法</p>
         </div>
       </div>
 
-      {professional && (
-        <div className="white-card evidence-card">
-          <div className="evidence-title"><span>📚</span><b>训练方法参考</b></div>
-          <div className="evidence-grid">
-            <div><b>入门</b><span>先学动作，选择能规范完成约 12–15 次的重量。</span></div>
-            <div><b>力量</b><span>复合动作优先；重负荷训练常用 2–3 组并保证充分休息。</span></div>
-            <div><b>增肌</b><span>更看重每周总训练量，可逐步累积到约 10+ 组/肌群/周。</span></div>
-          </div>
-          <p>主要肌群至少每周训练 2 次；动作质量和持续执行比复杂技巧更重要。</p>
-        </div>
-      )}
-
-      <div className="training-action-list">
-        {activity.actions.map((action, index) => (
-          <div className="white-card training-action-card professional-action" key={action.name}>
-            <div className="action-index">{String(index + 1).padStart(2,"0")}</div>
-            <div className="action-copy">
-              <b>{action.name}</b>
-              <span className="action-dose">{action.dose}</span>
-              {action.equipment && <span className="action-equipment">器械：{action.equipment}</span>}
-              <p>{action.cue}</p>
-            </div>
-            <div className="action-buttons">
-              {action.equipment && <button className="tutorial-btn" onClick={() => setTutorial(action)}>教程</button>}
-              <button className="record-btn" onClick={() => onRecord(activity, action)}>记录</button>
-            </div>
-          </div>
-        ))}
+      <div className="equipment-photo-grid">
+        {activity.actions.map((action) => {
+          const image=getExerciseImage(action.name);
+          return (
+            <button
+              className="equipment-photo-card"
+              key={action.name}
+              onClick={() => setTutorial(action)}
+            >
+              <div className="equipment-card-media">
+                {image ? (
+                  <img src={image} alt={action.name} loading="lazy" />
+                ) : (
+                  <div className="equipment-card-placeholder">
+                    <span>{activity.icon}</span>
+                    <small>动作图片待补充</small>
+                  </div>
+                )}
+                <span className="equipment-card-badge">查看教程</span>
+              </div>
+              <div className="equipment-card-copy">
+                <b>{action.name}</b>
+                <span>{action.equipment || "训练动作"}</span>
+                <small>{action.dose}</small>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       <button
@@ -1078,110 +1096,20 @@ function shortenTutorialText(text:string) {
 }
 
 function ExerciseVisual({name,fallbackIcon}:{name:string;fallbackIcon:string}) {
-  const photoSets: Record<string, {
-    posture: { src:string; alt:string; label:string; credit:string; page:string };
-    equipment?: { src:string; alt:string; label:string; credit:string; page:string };
-  }> = {
-    "杠铃卧推": {
-      posture: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Barbells.jpg?width=1000",
-        alt: "健身房内进行杠铃卧推的真实照片",
-        label: "动作姿势",
-        credit: "SAgbley / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Barbells.jpg"
-      },
-      equipment: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Bench%20press%20Machine.jpg?width=900",
-        alt: "健身房卧推架和训练凳真实照片",
-        label: "器械参考",
-        credit: "Aliva Sahoo / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Bench_press_Machine.jpg"
-      }
-    },
-    "高位下拉": {
-      posture: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Amer-Lat-Pulldown.jpg?width=1000",
-        alt: "健身房高位下拉动作真实照片",
-        label: "动作姿势",
-        credit: "Abooyeah / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Amer-Lat-Pulldown.jpg"
-      },
-      equipment: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Lat%20Pull%20down%20Machine.jpg?width=900",
-        alt: "高位下拉训练器真实照片",
-        label: "器械参考",
-        credit: "SAgbley / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Lat_Pull_down_Machine.jpg"
-      }
-    },
-    "坐姿腿举": {
-      posture: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Marian-Leg-Press.jpg?width=1000",
-        alt: "健身房使用腿举机的真实动作照片",
-        label: "动作姿势",
-        credit: "Abooyeah / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Marian-Leg-Press.jpg"
-      },
-      equipment: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Gym%20Leg%20Press%20Machine.jpg?width=900",
-        alt: "健身房腿举机真实照片",
-        label: "器械参考",
-        credit: "Aliva Sahoo / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Gym_Leg_Press_Machine.jpg"
-      }
-    },
-    "坐姿哑铃推举": {
-      posture: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Girl%20doing%20dumbbell%20shoulder%20press.jpg?width=1000",
-        alt: "健身房坐姿哑铃推举真实动作照片",
-        label: "动作姿势",
-        credit: "Trainer Academy / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Girl_doing_dumbbell_shoulder_press.jpg"
-      },
-      equipment: {
-        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Gym%20Bench.jpg?width=900",
-        alt: "健身房可调训练凳真实照片",
-        label: "训练凳参考",
-        credit: "Teddyhtsai / Wikimedia Commons",
-        page: "https://commons.wikimedia.org/wiki/File:Gym_Bench.jpg"
-      }
-    }
-  };
-
-  const set=photoSets[name];
-
-  if(set){
-    const photos=set.equipment ? [set.posture,set.equipment] : [set.posture];
+  const image=getExerciseImage(name);
+  if(image){
     return (
-      <div className="real-photo-gallery">
-        <div className="photo-grid">
-          {photos.map((photo,index)=>(
-            <figure className={index===0 ? "real-photo main-photo" : "real-photo equipment-photo"} key={photo.src}>
-              <div className="photo-frame">
-                <img
-                  src={photo.src}
-                  alt={photo.alt}
-                  loading="lazy"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                />
-                <span className="photo-label">{photo.label}</span>
-              </div>
-              <figcaption>
-                <a href={photo.page} target="_blank" rel="noreferrer">{photo.credit} ↗</a>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+      <div className="exercise-photo-single">
+        <img src={image} alt={name} loading="eager" />
+        <span className="photo-label">器材与使用姿势</span>
       </div>
     );
   }
-
   return (
     <div className="exercise-visual fallback-visual" aria-label={`${name}动作示意`}>
       <div className="fallback-icon">{fallbackIcon}</div>
       <b>{name}</b>
-      <span>暂未找到合适的开放授权真实照片</span>
+      <span>该动作的器材照片正在补充</span>
     </div>
   );
 }
