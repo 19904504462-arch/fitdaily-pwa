@@ -75,6 +75,7 @@ export default function Home() {
   const [showLog, setShowLog] = useState(false);
   const [showFood, setShowFood] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
+  const [showTheme, setShowTheme] = useState(false);
   const [minutes, setMinutes] = useState(45);
   const [moves, setMoves] = useState(5);
   const [note, setNote] = useState("");
@@ -185,11 +186,14 @@ export default function Home() {
         <div className="brand">
           <div className="avatar">🎀</div>
           <div>
-            <div className="eyebrow">个人健身工作台</div>
+            <div className="eyebrow">个人健身工作台 · v1.1</div>
             <h1>FitDaily</h1>
           </div>
         </div>
-        <button className="streak" onClick={() => setTab("calendar")}>🔥 {streak}天</button>
+        <div className="top-actions">
+          <button className="theme-quick" onClick={() => setShowTheme(true)} aria-label="主题设置">🎨</button>
+          <button className="streak" onClick={() => setTab("calendar")}>🔥 {streak}天</button>
+        </div>
       </header>
 
       <section className="screen">
@@ -407,6 +411,50 @@ export default function Home() {
             setState(s => ({...s, foodKcal: s.foodKcal + foodInput}));
             setShowFood(false);
           }}>加入今日摄入</button>
+        </Sheet>
+      )}
+
+
+      {showTheme && (
+        <Sheet title="主题与背景" subtitle="选择喜欢的主题，也可以自定义背景颜色" onClose={() => setShowTheme(false)}>
+          <div className="theme-presets sheet-themes">
+            {themePresets.map(theme => (
+              <button
+                key={theme.id}
+                className={`theme-option ${state.theme.preset === theme.id ? "active" : ""}`}
+                onClick={() => setState(s => ({
+                  ...s,
+                  theme: { preset: theme.id, background: theme.background }
+                }))}
+              >
+                <span className="theme-swatch" style={{ background: theme.accent }} />
+                <small>{theme.name}</small>
+              </button>
+            ))}
+          </div>
+          <div className="custom-bg-row sheet-custom-bg">
+            <div>
+              <b>自定义背景</b>
+              <span>点击右侧色块选择任意颜色</span>
+            </div>
+            <label className="color-picker-wrap">
+              <input
+                type="color"
+                value={state.theme.background}
+                onChange={e => setState(s => ({
+                  ...s,
+                  theme: { ...s.theme, background: e.target.value }
+                }))}
+              />
+              <span style={{ background: state.theme.background }} />
+            </label>
+          </div>
+          <button
+            className="reset-theme"
+            onClick={() => setState(s => ({ ...s, theme: { ...initialState.theme } }))}
+          >
+            恢复默认粉色
+          </button>
         </Sheet>
       )}
 
