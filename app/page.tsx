@@ -96,7 +96,20 @@ export default function Home() {
     setHydrated(true);
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/sw.js`).catch(() => {});
+      let refreshing = false;
+      const swUrl = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/sw.js?v=3`;
+
+      navigator.serviceWorker.register(swUrl, { updateViaCache: "none" })
+        .then(registration => registration.update())
+        .catch(() => {});
+
+      const handleControllerChange = () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      };
+
+      navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
     }
 
     const handler = (e: Event) => {
