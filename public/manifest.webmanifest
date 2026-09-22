@@ -1,0 +1,19 @@
+{
+  "name": "FitDaily 个人健身工作台",
+  "short_name": "FitDaily",
+  "description": "训练、饮食、日程与器械指南",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff7fa",
+  "theme_color": "#fff5f8",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
