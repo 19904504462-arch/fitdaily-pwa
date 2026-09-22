@@ -1078,90 +1078,101 @@ function shortenTutorialText(text:string) {
 }
 
 function ExerciseVisual({name,fallbackIcon}:{name:string;fallbackIcon:string}) {
-  if(name==="杠铃卧推"){
-    return (
-      <div className="exercise-visual bench-visual" aria-label="杠铃卧推动作示意图">
-        <svg viewBox="0 0 360 210" role="img">
-          <rect x="0" y="0" width="360" height="210" rx="24" className="visual-bg"/>
-          <rect x="78" y="144" width="215" height="16" rx="8" className="machine"/>
-          <rect x="118" y="158" width="12" height="30" rx="6" className="machine"/>
-          <rect x="254" y="158" width="12" height="30" rx="6" className="machine"/>
-          <circle cx="126" cy="115" r="17" className="skin"/>
-          <path d="M143 120 L220 124" className="body-line"/>
-          <path d="M178 124 L155 148" className="body-line"/>
-          <path d="M213 126 L242 150" className="body-line"/>
-          <path d="M159 118 L151 87" className="limb"/>
-          <path d="M207 120 L216 87" className="limb"/>
-          <line x1="116" y1="83" x2="247" y2="83" className="bar"/>
-          <rect x="104" y="69" width="10" height="28" rx="4" className="plate"/>
-          <rect x="249" y="69" width="10" height="28" rx="4" className="plate"/>
-          <path d="M52 55 L52 161 M52 55 L90 55 M309 55 L309 161 M271 55 L309 55" className="rack"/>
-          <path d="M152 83 L152 105 M216 83 L216 105" className="guide"/>
-          <text x="180" y="28" textAnchor="middle" className="visual-title">杠铃卧推</text>
-          <text x="180" y="197" textAnchor="middle" className="visual-caption">肩胛稳定 · 杠铃控制下放 · 平稳推起</text>
-        </svg>
-      </div>
-    );
-  }
+  const photoSets: Record<string, {
+    posture: { src:string; alt:string; label:string; credit:string; page:string };
+    equipment?: { src:string; alt:string; label:string; credit:string; page:string };
+  }> = {
+    "杠铃卧推": {
+      posture: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Barbells.jpg?width=1000",
+        alt: "健身房内进行杠铃卧推的真实照片",
+        label: "动作姿势",
+        credit: "SAgbley / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Barbells.jpg"
+      },
+      equipment: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Bench%20press%20Machine.jpg?width=900",
+        alt: "健身房卧推架和训练凳真实照片",
+        label: "器械参考",
+        credit: "Aliva Sahoo / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Bench_press_Machine.jpg"
+      }
+    },
+    "高位下拉": {
+      posture: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Amer-Lat-Pulldown.jpg?width=1000",
+        alt: "健身房高位下拉动作真实照片",
+        label: "动作姿势",
+        credit: "Abooyeah / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Amer-Lat-Pulldown.jpg"
+      },
+      equipment: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Lat%20Pull%20down%20Machine.jpg?width=900",
+        alt: "高位下拉训练器真实照片",
+        label: "器械参考",
+        credit: "SAgbley / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Lat_Pull_down_Machine.jpg"
+      }
+    },
+    "坐姿腿举": {
+      posture: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Marian-Leg-Press.jpg?width=1000",
+        alt: "健身房使用腿举机的真实动作照片",
+        label: "动作姿势",
+        credit: "Abooyeah / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Marian-Leg-Press.jpg"
+      },
+      equipment: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Gym%20Leg%20Press%20Machine.jpg?width=900",
+        alt: "健身房腿举机真实照片",
+        label: "器械参考",
+        credit: "Aliva Sahoo / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Gym_Leg_Press_Machine.jpg"
+      }
+    },
+    "坐姿哑铃推举": {
+      posture: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Girl%20doing%20dumbbell%20shoulder%20press.jpg?width=1000",
+        alt: "健身房坐姿哑铃推举真实动作照片",
+        label: "动作姿势",
+        credit: "Trainer Academy / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Girl_doing_dumbbell_shoulder_press.jpg"
+      },
+      equipment: {
+        src: "https://commons.wikimedia.org/wiki/Special:FilePath/Gym%20Bench.jpg?width=900",
+        alt: "健身房可调训练凳真实照片",
+        label: "训练凳参考",
+        credit: "Teddyhtsai / Wikimedia Commons",
+        page: "https://commons.wikimedia.org/wiki/File:Gym_Bench.jpg"
+      }
+    }
+  };
 
-  if(name==="高位下拉"){
-    return (
-      <div className="exercise-visual pulldown-visual" aria-label="高位下拉动作示意图">
-        <svg viewBox="0 0 360 210" role="img">
-          <rect width="360" height="210" rx="24" className="visual-bg"/>
-          <path d="M66 42 L66 174 M294 42 L294 174 M66 42 L294 42" className="rack"/>
-          <line x1="180" y1="42" x2="180" y2="72" className="cable"/>
-          <line x1="122" y1="72" x2="238" y2="72" className="bar"/>
-          <circle cx="180" cy="111" r="16" className="skin"/>
-          <path d="M180 128 L180 167" className="body-line"/>
-          <path d="M180 136 L147 92 M180 136 L213 92" className="limb"/>
-          <path d="M180 167 L158 190 M180 167 L202 190" className="limb"/>
-          <rect x="137" y="174" width="86" height="10" rx="5" className="machine"/>
-          <path d="M147 92 L128 74 M213 92 L232 74" className="guide"/>
-          <text x="180" y="27" textAnchor="middle" className="visual-title">高位下拉</text>
-          <text x="180" y="201" textAnchor="middle" className="visual-caption">胸部抬起 · 肘向下 · 控制回程</text>
-        </svg>
-      </div>
-    );
-  }
+  const set=photoSets[name];
 
-  if(name==="坐姿腿举"){
+  if(set){
+    const photos=set.equipment ? [set.posture,set.equipment] : [set.posture];
     return (
-      <div className="exercise-visual legpress-visual" aria-label="腿举机动作示意图">
-        <svg viewBox="0 0 360 210" role="img">
-          <rect width="360" height="210" rx="24" className="visual-bg"/>
-          <path d="M72 158 L122 103 L157 103 L118 158 Z" className="machine-fill"/>
-          <rect x="118" y="140" width="93" height="15" rx="7" className="machine"/>
-          <path d="M268 52 L310 79 L257 166 L219 140 Z" className="machine-fill"/>
-          <circle cx="151" cy="104" r="15" className="skin"/>
-          <path d="M160 116 L193 139" className="body-line"/>
-          <path d="M191 139 L230 126 L268 103" className="limb"/>
-          <path d="M194 143 L232 147 L270 129" className="limb"/>
-          <path d="M270 99 L283 86 M270 130 L286 120" className="guide"/>
-          <text x="180" y="28" textAnchor="middle" className="visual-title">坐姿腿举</text>
-          <text x="180" y="197" textAnchor="middle" className="visual-caption">背部贴靠 · 脚掌踩稳 · 膝盖不过度锁死</text>
-        </svg>
-      </div>
-    );
-  }
-
-  if(name==="坐姿哑铃推举"){
-    return (
-      <div className="exercise-visual shoulderpress-visual" aria-label="哑铃推举动作示意图">
-        <svg viewBox="0 0 360 210" role="img">
-          <rect width="360" height="210" rx="24" className="visual-bg"/>
-          <rect x="147" y="93" width="66" height="88" rx="14" className="machine-fill"/>
-          <rect x="132" y="168" width="96" height="13" rx="6" className="machine"/>
-          <circle cx="180" cy="92" r="15" className="skin"/>
-          <path d="M180 107 L180 158" className="body-line"/>
-          <path d="M180 118 L145 99 L138 67" className="limb"/>
-          <path d="M180 118 L215 99 L222 67" className="limb"/>
-          <rect x="125" y="54" width="26" height="11" rx="5" className="dumbbell"/>
-          <rect x="209" y="54" width="26" height="11" rx="5" className="dumbbell"/>
-          <path d="M160 158 L150 188 M200 158 L210 188" className="limb"/>
-          <text x="180" y="27" textAnchor="middle" className="visual-title">哑铃推举</text>
-          <text x="180" y="201" textAnchor="middle" className="visual-caption">核心稳定 · 垂直推举 · 不过度后仰</text>
-        </svg>
+      <div className="real-photo-gallery">
+        <div className="photo-grid">
+          {photos.map((photo,index)=>(
+            <figure className={index===0 ? "real-photo main-photo" : "real-photo equipment-photo"} key={photo.src}>
+              <div className="photo-frame">
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                />
+                <span className="photo-label">{photo.label}</span>
+              </div>
+              <figcaption>
+                <a href={photo.page} target="_blank" rel="noreferrer">{photo.credit} ↗</a>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </div>
     );
   }
@@ -1170,19 +1181,11 @@ function ExerciseVisual({name,fallbackIcon}:{name:string;fallbackIcon:string}) {
     <div className="exercise-visual fallback-visual" aria-label={`${name}动作示意`}>
       <div className="fallback-icon">{fallbackIcon}</div>
       <b>{name}</b>
-      <span>动作示意图将在后续继续补充</span>
+      <span>暂未找到合适的开放授权真实照片</span>
     </div>
   );
 }
 
-function TutorialSection({icon,title,children}:{icon:string;title:string;children:React.ReactNode}) {
-  return (
-    <section className="white-card tutorial-section">
-      <h3><span>{icon}</span>{title}</h3>
-      {children}
-    </section>
-  );
-}
 
 function ProfileMenuItem({icon,title,desc,onClick}:{icon:string;title:string;desc:string;onClick:()=>void}) {
   return (
