@@ -20,6 +20,15 @@ type Checkin = {
   moves: number;
   note: string;
 };
+
+type PlannedActivity = {
+  id: string;
+  date: string;
+  start: string;
+  end: string;
+  sport: string;
+  note: string;
+};
 type ThemeState = {
   preset: string;
   background: string;
@@ -30,6 +39,7 @@ type AppState = {
   foodKcal: number;
   checkins: Checkin[];
   schedule: { time: string; name: string }[];
+  plans: PlannedActivity[];
   theme: ThemeState;
 };
 
@@ -140,6 +150,7 @@ const initialState: AppState = {
   foodKcal: 0,
   checkins: [],
   schedule: [{ time: "08:00", name: "晨跑 🏃" }],
+  plans: [],
   theme: { preset: "pink", background: "#fff7fa" },
 };
 
@@ -168,6 +179,7 @@ export default function Home() {
   const [profileView, setProfileView] = useState<ProfileView>("main");
   const [trainCategory, setTrainCategory] = useState<TrainCategory>("strength");
   const [trainDetail, setTrainDetail] = useState<string | null>(null);
+  const [calendarDate, setCalendarDate] = useState<string | null>(null);
   const [minutes, setMinutes] = useState(45);
   const [moves, setMoves] = useState(5);
   const [note, setNote] = useState("");
@@ -410,11 +422,31 @@ export default function Home() {
 
         {tab === "calendar" && (
           <>
-            <div className="page-heading left">
-              <h2>训练日历</h2>
-              <p>所有训练记录都会自动出现在这里</p>
-            </div>
-            <Calendar checkins={state.checkins} />
+            {!calendarDate ? (
+              <>
+                <div className="page-heading left">
+                  <h2>训练日历</h2>
+                  <p>点击任意日期，安排当天的运动时间和项目。</p>
+                </div>
+                <Calendar
+                  checkins={state.checkins}
+                  plans={state.plans}
+                  onSelectDate={setCalendarDate}
+                />
+                <div className="calendar-legend">
+                  <span><i className="legend-dot planned" />有计划</span>
+                  <span><i className="legend-dot done" />已完成训练</span>
+                </div>
+              </>
+            ) : (
+              <DayPlanPage
+                date={calendarDate}
+                plans={state.plans.filter(x => x.date === calendarDate)}
+                onBack={() => setCalendarDate(null)}
+                onAdd={plan => setState(s => ({ ...s, plans: [...s.plans, plan] }))}
+                onDelete={id => setState(s => ({ ...s, plans: s.plans.filter(x => x.id !== id) }))}
+              />
+            )}
           </>
         )}
 
@@ -603,7 +635,7 @@ export default function Home() {
       <nav className="bottom-nav">
         <NavItem icon="⌂" label="首页" active={tab === "home"} onClick={() => setTab("home")} />
         <NavItem icon="💪" label="训练" active={tab === "train"} onClick={() => { setTab("train"); setTrainDetail(null); }} />
-        <NavItem icon="▦" label="日程" active={tab === "calendar"} onClick={() => setTab("calendar")} />
+        <NavItem icon="▦" label="日程" active={tab === "calendar"} onClick={() => { setTab("calendar"); setCalendarDate(null); }} />
         <NavItem icon="🍜" label="饮食" active={tab === "food"} onClick={() => setTab("food")} />
         <NavItem icon="♡" label="我的" active={tab === "profile"} onClick={() => { setTab("profile"); setProfileView("main"); }} />
       </nav>
@@ -726,7 +758,7 @@ function Sheet({title,subtitle,onClose,children}:{title:string;subtitle:string;o
     </div>
   </div>
 }
-function Calendar({checkins}:{checkins:Checkin[]}) {
+function Calendar({checkins,plans,onSelectDate}:{checkins:Checkin[];plans:PlannedActivity[];onSelectDate:(date:string)=>void}) {
   const now = new Date();
   const [cursor, setCursor] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
   const y = cursor.getFullYear(), m = cursor.getMonth();
@@ -736,21 +768,175 @@ function Calendar({checkins}:{checkins:Checkin[]}) {
   const items = Array.from({length:42}, (_,i)=>{
     const d = new Date(start); d.setDate(start.getDate()+i); return d;
   });
-  const set = new Set(checkins.map(x=>x.date));
+  const doneSet = new Set(checkins.map(x=>x.date));
+  const planCount = plans.reduce<Record<string,number>>((acc,plan)=>{
+    acc[plan.date]=(acc[plan.date]||0)+1;
+    return acc;
+  },{});
+
   return <div className="white-card calendar-card">
     <div className="calendar-head">
-      <button onClick={()=>setCursor(new Date(y,m-1,1))}>‹</button>
+      <button type="button" onClick={()=>setCursor(new Date(y,m-1,1))}>‹</button>
       <b>{y}年{m+1}月</b>
-      <button onClick={()=>setCursor(new Date(y,m+1,1))}>›</button>
+      <button type="button" onClick={()=>setCursor(new Date(y,m+1,1))}>›</button>
     </div>
     <div className="week-row">{["一","二","三","四","五","六","日"].map(x=><span key={x}>{x}</span>)}</div>
     <div className="calendar-grid">
       {items.map(d=>{
-        const k=dateKey(d), done=set.has(k), other=d.getMonth()!==m, today=k===dateKey();
-        return <div className={`day ${done?"done":""} ${other?"other":""} ${today?"today":""}`} key={k}>
-          <span>{d.getDate()}</span>{done && <i>✓</i>}
-        </div>
+        const k=dateKey(d), done=doneSet.has(k), planned=(planCount[k]||0)>0, other=d.getMonth()!==m, today=k===dateKey();
+        return <button
+          type="button"
+          className={`day ${done?"done":""} ${planned?"planned":""} ${other?"other":""} ${today?"today":""}`}
+          key={k}
+          onClick={()=>onSelectDate(k)}
+          aria-label={`${k}${planned ? `，已有${planCount[k]}项计划` : ""}${done ? "，已完成训练" : ""}`}
+        >
+          <span>{d.getDate()}</span>
+          {planned && <i className="plan-mark">{planCount[k]}</i>}
+          {done && <i className="done-mark">✓</i>}
+        </button>
       })}
     </div>
   </div>
+}
+
+function DayPlanPage({
+  date,plans,onBack,onAdd,onDelete
+}:{
+  date:string;
+  plans:PlannedActivity[];
+  onBack:()=>void;
+  onAdd:(plan:PlannedActivity)=>void;
+  onDelete:(id:string)=>void;
+}) {
+  const [start,setStart]=useState("18:00");
+  const [end,setEnd]=useState("19:00");
+  const [sport,setSport]=useState("力量训练");
+  const [note,setNote]=useState("");
+  const [error,setError]=useState("");
+
+  const parts=date.split("-").map(Number);
+  const d=new Date(parts[0],parts[1]-1,parts[2]);
+  const label=d.toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+  const sorted=[...plans].sort((a,b)=>a.start.localeCompare(b.start));
+
+  const submit=(e:React.FormEvent)=>{
+    e.preventDefault();
+    if(!start || !end){
+      setError("请填写开始和结束时间。");
+      return;
+    }
+    if(end<=start){
+      setError("结束时间需要晚于开始时间。");
+      return;
+    }
+    const item:PlannedActivity={
+      id:`${date}-${Date.now()}`,
+      date,
+      start,
+      end,
+      sport,
+      note:note.trim()
+    };
+    onAdd(item);
+    setNote("");
+    setError("");
+  };
+
+  return (
+    <div className="day-plan-page">
+      <button className="back-button" type="button" onClick={onBack}>← 返回月历</button>
+
+      <div className="day-plan-heading">
+        <div>
+          <span>当天计划</span>
+          <h2>{label}</h2>
+          <p>可以安排多个时间段，不同运动分开记录。</p>
+        </div>
+        <div className="day-plan-count">{plans.length}<small>项</small></div>
+      </div>
+
+      <div className="white-card day-plan-form-card">
+        <h3>+ 添加运动计划</h3>
+        <form className="day-plan-form" onSubmit={submit}>
+          <div className="time-range">
+            <label>
+              <span>开始</span>
+              <input type="time" value={start} onChange={e=>setStart(e.target.value)} />
+            </label>
+            <div className="time-arrow">→</div>
+            <label>
+              <span>结束</span>
+              <input type="time" value={end} onChange={e=>setEnd(e.target.value)} />
+            </label>
+          </div>
+
+          <label className="plan-field">
+            <span>准备进行什么运动</span>
+            <select value={sport} onChange={e=>setSport(e.target.value)}>
+              <optgroup label="力量训练">
+                <option>力量训练</option>
+                <option>胸部训练</option>
+                <option>背部训练</option>
+                <option>腿部训练</option>
+                <option>肩部训练</option>
+                <option>手臂训练</option>
+                <option>核心训练</option>
+              </optgroup>
+              <optgroup label="其他运动">
+                <option>游泳</option>
+                <option>羽毛球</option>
+                <option>跑步</option>
+                <option>骑行</option>
+                <option>跳绳</option>
+                <option>瑜伽拉伸</option>
+              </optgroup>
+              <option>其他</option>
+            </select>
+          </label>
+
+          <label className="plan-field">
+            <span>备注（可选）</span>
+            <input
+              type="text"
+              value={note}
+              maxLength={80}
+              onChange={e=>setNote(e.target.value)}
+              placeholder="例如：游泳馆，轻松游 1000 m"
+            />
+          </label>
+
+          {error && <div className="form-error" role="alert">{error}</div>}
+          <button className="primary-action compact" type="submit">保存当天计划</button>
+        </form>
+      </div>
+
+      <div className="day-plan-list-head">
+        <h3>当天安排</h3>
+        <span>{plans.length ? "按时间排序" : "还没有安排"}</span>
+      </div>
+
+      <div className="day-plan-list">
+        {sorted.length ? sorted.map(item=>(
+          <div className="white-card day-plan-item" key={item.id}>
+            <div className="plan-time">
+              <b>{item.start}</b>
+              <span>{item.end}</span>
+            </div>
+            <div className="plan-info">
+              <b>{item.sport}</b>
+              <span>{item.note || "暂无备注"}</span>
+            </div>
+            <button type="button" onClick={()=>onDelete(item.id)} aria-label={`删除${item.sport}计划`}>×</button>
+          </div>
+        )) : (
+          <div className="empty-plan white-card">
+            <span>🗓️</span>
+            <b>这一天还没有运动计划</b>
+            <p>在上方选择时间段和运动项目后保存。</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
