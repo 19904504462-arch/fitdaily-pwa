@@ -6,12 +6,28 @@ type Tab = "home" | "train" | "calendar" | "food" | "profile";
 type ProfileView = "main" | "theme" | "equipment" | "data" | "install";
 type TrainCategory = "strength" | "sport";
 
+type TrainingAction = {
+  name: string;
+  dose: string;
+  cue: string;
+  equipment?: string;
+  target?: string;
+  level?: string;
+  rest?: string;
+  setup?: string[];
+  steps?: string[];
+  mistakes?: string[];
+  progression?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+};
+
 type TrainingActivity = {
   id: string;
   name: string;
   icon: string;
   desc: string;
-  actions: { name: string; dose: string; cue: string }[];
+  actions: TrainingAction[];
 };
 type Checkin = {
   date: string;
@@ -55,51 +71,254 @@ const themePresets = [
 ] as const;
 
 const strengthActivities: TrainingActivity[] = [
-  { id:"chest", name:"胸部", icon:"🏋️", desc:"推类力量训练", actions:[
-    { name:"杠铃卧推", dose:"4组 × 6–8次", cue:"肩胛稳定、双脚踩稳，优先保证动作控制。" },
-    { name:"上斜哑铃卧推", dose:"3组 × 8–10次", cue:"凳面保持适中角度，感受胸上部发力。" },
-    { name:"器械夹胸", dose:"3组 × 10–15次", cue:"动作末端停顿，不要用惯性甩动。" }
-  ]},
-  { id:"back", name:"背部", icon:"🧍", desc:"背阔肌与中上背", actions:[
-    { name:"高位下拉", dose:"4组 × 8–10次", cue:"肘向下带动，避免只用手臂拉。" },
-    { name:"坐姿划船", dose:"3组 × 8–12次", cue:"躯干稳定，把肘向身体后侧带。" },
-    { name:"单臂哑铃划船", dose:"3组 × 10次", cue:"保持脊柱稳定，控制回程。" }
-  ]},
-  { id:"legs", name:"腿部", icon:"🦵", desc:"下肢力量训练", actions:[
-    { name:"深蹲", dose:"4组 × 6–8次", cue:"膝盖方向与脚尖一致，保持躯干稳定。" },
-    { name:"腿举", dose:"4组 × 10次", cue:"控制下放，不要在顶端猛烈锁膝。" },
-    { name:"罗马尼亚硬拉", dose:"3组 × 8–10次", cue:"髋部向后移动，感受腿后侧拉伸。" }
-  ]},
-  { id:"shoulders", name:"肩部", icon:"🙋", desc:"肩部稳定与围度", actions:[
-    { name:"哑铃推举", dose:"3组 × 8–10次", cue:"保持核心稳定，避免腰部过度后仰。" },
-    { name:"哑铃侧平举", dose:"4组 × 12–15次", cue:"重量不必过大，避免耸肩借力。" },
-    { name:"绳索面拉", dose:"3组 × 12–15次", cue:"肘部向外，感受后束和肩胛参与。" }
-  ]},
-  { id:"arms", name:"手臂", icon:"💪", desc:"肱二头与肱三头", actions:[
-    { name:"哑铃弯举", dose:"3组 × 10–12次", cue:"固定上臂，减少身体摆动。" },
-    { name:"绳索下压", dose:"3组 × 10–12次", cue:"肘部贴近身体，控制回程。" },
-    { name:"锤式弯举", dose:"3组 × 10次", cue:"手腕保持中立，避免甩动。" }
-  ]},
-  { id:"core", name:"核心", icon:"🧘", desc:"核心稳定训练", actions:[
-    { name:"平板支撑", dose:"3组 × 30–60秒", cue:"保持身体一条直线，不塌腰。" },
-    { name:"死虫", dose:"3组 × 10次/侧", cue:"腰背保持稳定贴地，动作放慢。" },
-    { name:"卷腹", dose:"3组 × 12–15次", cue:"避免颈部发力，控制躯干卷起。" }
-  ]},
-  { id:"glutes", name:"臀部", icon:"🍑", desc:"臀腿后侧训练", actions:[
-    { name:"臀桥", dose:"4组 × 10–12次", cue:"顶端夹紧臀部，不要过度顶腰。" },
-    { name:"保加利亚分腿蹲", dose:"3组 × 8–10次/侧", cue:"前脚踩稳，保持膝盖轨迹。" },
-    { name:"绳索后踢", dose:"3组 × 12次/侧", cue:"骨盆保持稳定，避免身体大幅前倾。" }
-  ]},
-  { id:"fullbody", name:"全身", icon:"🤸", desc:"全身综合训练", actions:[
-    { name:"壶铃摆动", dose:"4组 × 15次", cue:"以髋伸发力，不要只用手臂抬起。" },
-    { name:"深蹲推举", dose:"3组 × 10次", cue:"先稳定下肢，再顺势完成推举。" },
-    { name:"农夫行走", dose:"4组 × 30–45秒", cue:"保持躯干直立和稳定呼吸。" }
-  ]},
-  { id:"cardio", name:"有氧", icon:"🏃", desc:"器械心肺训练", actions:[
-    { name:"坡度快走", dose:"25–40分钟", cue:"保持可持续节奏，不必追求过高速度。" },
-    { name:"椭圆机", dose:"20–35分钟", cue:"保持动作连贯，控制呼吸。" },
-    { name:"划船机", dose:"15–25分钟", cue:"先蹬腿再拉手，避免只靠上肢。" }
-  ]}
+  {
+    id:"chest", name:"胸部", icon:"🏋️", desc:"胸大肌为主，同时训练肱三头肌和前三角", actions:[
+      {
+        name:"杠铃卧推", dose:"3–4组 × 6–10次", cue:"大重量动作优先保证稳定轨迹和保护措施。",
+        equipment:"平板卧推凳、杠铃、杠铃片、卧推架/安全杆", target:"胸大肌；辅助：肱三头肌、前三角", level:"入门进阶 / 中级", rest:"2–3分钟",
+        setup:["卧凳置于架内，眼睛大致位于杠铃正下方；大重量时先设置安全杆或找保护者。","双脚踩稳地面，肩胛骨向后、向下收紧，上背稳定贴住卧凳。","握距通常略宽于肩，手腕尽量保持在前臂上方。"],
+        steps:["从架上取杠后稳定在肩部上方。","吸气并控制杠铃下放至胸部中下段附近，前臂尽量保持接近垂直。","呼气推起，杠铃沿自然弧线回到肩部上方，不要反弹起杠。"],
+        mistakes:["下放过快或用胸口反弹杠铃。","肘部过度外展、手腕过度后折。","为了重量抬臀或失去肩胛稳定。"],
+        progression:"当目标次数能稳定完成且动作不变形时再逐步加重；不建议用牺牲动作范围换重量。",
+        sourceName:"ACE 胸部训练研究 / Exercise Library", sourceUrl:"https://www.acefitness.org/resources/pros/expert-articles/8972/be-a-chest-day-champion-an-evidence-based-approach-to-training-the-chest/"
+      },
+      {
+        name:"蝴蝶机夹胸", dose:"3组 × 10–15次", cue:"更适合控制胸部收缩，不需要追求很大的重量。",
+        equipment:"Pec Deck / 蝴蝶机夹胸器", target:"胸大肌", level:"入门", rest:"60–90秒",
+        setup:["调整座椅，使上臂/肘部大致位于胸部至肩部高度，具体以器械结构为准。","背部贴住靠垫，双脚踩稳，手臂贴合把手或护垫。"],
+        steps:["保持胸部自然抬起，将两侧手臂缓慢向中间合拢。","接近中线时短暂停顿，感受胸部收缩。","缓慢返回，不让配重片猛烈撞击。"],
+        mistakes:["重量过大导致上背离开靠垫。","回程太快、肩部被强行拉到过度伸展。","用身体摆动代替胸部发力。"],
+        progression:"先增加动作控制与完整范围，再增加重量；有肩部不适史时可优先选择更舒适的胸推器械。",
+        sourceName:"ACE Top Chest Exercises", sourceUrl:"https://www.acefitness.org/certifiednewsarticle/3003/what-are-the-top-3-most-effective-chest-exercises/"
+      },
+      {
+        name:"绳索夹胸", dose:"3组 × 10–15次", cue:"保持躯干稳定，让手臂沿弧线向前内侧合拢。",
+        equipment:"龙门架 / 双滑轮绳索机、单手把", target:"胸大肌", level:"中级", rest:"60–90秒",
+        setup:["左右滑轮调到合适高度，两手各握一个把手。","采用前后站姿或稳定的平行站姿，肘部保持轻微弯曲。"],
+        steps:["躯干稳定，双臂沿宽弧线向前、向内合拢。","中间位置短暂停顿，保持手肘角度基本不变。","缓慢回到起始位置，不让肩部被拉到过度后伸。"],
+        mistakes:["身体跟着把手前后摆动。","为了扩大幅度让手臂过度越过身体后方。","重量过大导致动作变成推举。"],
+        progression:"可以通过调节滑轮高度改变刺激角度，但先固定一种角度熟练动作。",
+        sourceName:"ACE Bent-forward Cable Crossover", sourceUrl:"https://www.acefitness.org/certifiednewsarticle/3003/what-are-the-top-3-most-effective-chest-exercises/"
+      }
+    ]
+  },
+  {
+    id:"back", name:"背部", icon:"🧍", desc:"背阔肌、菱形肌、斜方肌及肘屈肌群", actions:[
+      {
+        name:"高位下拉", dose:"3–4组 × 8–12次", cue:"先让肩胛下沉，再用肘向下拉，不要只靠手臂。",
+        equipment:"高位下拉机、长杆或中立握把", target:"背阔肌；辅助：肱二头肌、上背", level:"入门", rest:"90–120秒",
+        setup:["调整大腿固定垫，使腿部能被稳定压住。","握距略宽于肩，胸部自然抬起，躯干仅轻微后倾。"],
+        steps:["先将肩胛骨下沉并略向后收。","将肘部向身体两侧下方拉，横杆靠近上胸。","短暂停顿后缓慢伸直手臂，让背阔肌充分拉长。"],
+        mistakes:["把横杆拉到颈后。","大幅后仰、用身体摆动借力。","耸肩并只用手臂拉。"],
+        progression:"先能稳定控制回程，再逐渐增加重量；若无法把杆拉到上胸附近且动作变形，应减重。",
+        sourceName:"ACE Back Exercise Research", sourceUrl:"https://www.acefitness.org/continuing-education/certified/special-dec-2018-issue/7146/ace-sponsored-research-what-is-the-best-back-exercise/"
+      },
+      {
+        name:"坐姿绳索划船", dose:"3组 × 8–12次", cue:"胸部保持抬起，肘向后拉到躯干旁，不用腰部甩动。",
+        equipment:"坐姿划船机 / 低位绳索机、V形把手", target:"中背、背阔肌；辅助：肱二头肌", level:"入门", rest:"90–120秒",
+        setup:["双脚踩稳踏板，膝盖微屈，背部保持自然中立。","握住把手，先把胸部抬起并稳定躯干。"],
+        steps:["将肘部沿身体两侧向后拉，直到把手靠近腹部。","末端停顿约1秒，感受肩胛后缩。","缓慢伸直手臂返回，不要含胸塌腰。"],
+        mistakes:["每次都用腰部大幅前后摆动。","耸肩、肘部外张过多。","回程直接放掉配重。"],
+        progression:"先增加停顿和控制，之后再加重量或更换不同握把。",
+        sourceName:"ACE Seated Row", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/"
+      },
+      {
+        name:"胸托划船机", dose:"3组 × 10–12次", cue:"胸部贴住支撑垫，减少腰部借力。",
+        equipment:"胸托划船机 / 杠杆式划船机", target:"中背、菱形肌、背阔肌", level:"入门", rest:"90秒",
+        setup:["调整座椅，使胸部能稳定贴住支撑垫，把手大致在胸口高度。","双脚踩稳，保持颈部中立。"],
+        steps:["先稳定肩胛，再将肘向后拉。","把手靠近躯干时停顿，保持胸部不离开支撑垫。","慢慢伸直手臂回到起始位置。"],
+        mistakes:["为了拉更重让胸部离开靠垫。","耸肩或手腕过度弯折。","回程完全失去控制。"],
+        progression:"适合新手建立背部发力感；熟练后可逐步过渡到自由重量划船。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      }
+    ]
+  },
+  {
+    id:"legs", name:"腿部", icon:"🦵", desc:"股四头肌、臀肌、腘绳肌及小腿", actions:[
+      {
+        name:"坐姿腿举", dose:"3–4组 × 8–12次", cue:"脚掌完整贴住踏板，控制下放，不要顶端锁死膝盖。",
+        equipment:"坐姿腿举机 / 45°腿举机", target:"股四头肌、臀肌、腘绳肌", level:"入门", rest:"2分钟",
+        setup:["背部和骶骨贴住靠背，双脚稳定踩在踏板上。","调整座椅，使起始位置膝关节大约接近90°弯曲且脚跟不抬起。"],
+        steps:["收紧核心，呼气将踏板平稳推远。","伸膝到接近自然伸直，但不要猛烈锁死。","吸气缓慢回程，保持腰背贴住靠垫。"],
+        mistakes:["最低点骨盆卷起、腰部离开靠背。","膝盖向内塌。","脚跟离开踏板或顶端暴力锁膝。"],
+        progression:"先稳定控制完整范围；可在熟练后采用单腿版本，但仍需从轻重量开始。",
+        sourceName:"ACE Seated Leg Press", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/154/seated-leg-press/"
+      },
+      {
+        name:"杠铃深蹲", dose:"3–4组 × 5–10次", cue:"这是技术要求较高的自由重量动作，新手应先学习空杆与徒手深蹲。",
+        equipment:"深蹲架、杠铃、杠铃片、安全杆", target:"臀肌、股四头肌、腘绳肌、核心", level:"高级动作 / 需技术基础", rest:"2–3分钟",
+        setup:["将杠铃架在略低于肩部的位置，并设置安全杆。","杠铃稳定放在上背部，胸部抬起，双脚约肩宽或略宽。"],
+        steps:["吸气并收紧躯干，髋膝同时屈曲下蹲。","保持膝盖方向与脚尖基本一致，背部保持稳定。","脚掌用力蹬地，髋膝协同伸展回到站立。"],
+        mistakes:["为了深度出现明显腰背塌陷。","膝盖明显内扣。","没有安全措施就进行接近极限重量。"],
+        progression:"先从徒手/高脚杯深蹲学动作，再逐步进入空杆和杠铃深蹲。",
+        sourceName:"ACE Back Squat", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/11/back-squat/"
+      },
+      {
+        name:"罗马尼亚硬拉", dose:"3组 × 8–12次", cue:"动作核心是髋铰链，不是深蹲。",
+        equipment:"杠铃或哑铃", target:"腘绳肌、臀大肌、竖脊肌", level:"中级", rest:"90–120秒",
+        setup:["双脚约髋宽，杠铃或哑铃贴近大腿，膝盖轻微弯曲。","收紧核心并保持脊柱自然中立。"],
+        steps:["髋部主动向后推，重量沿腿部附近向下移动。","下降到还能保持背部稳定且腿后侧有明显拉伸的位置。","臀部发力向前伸髋回到站立。"],
+        mistakes:["把动作做成蹲起。","重量离身体太远。","为了下降更低而弓腰。"],
+        progression:"先用轻哑铃练习髋铰链，再逐步增加重量；下降深度由自身活动度决定。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      }
+    ]
+  },
+  {
+    id:"shoulders", name:"肩部", icon:"🙋", desc:"三角肌、肩袖和肩胛稳定肌群", actions:[
+      {
+        name:"坐姿哑铃推举", dose:"3组 × 8–12次", cue:"坐姿靠背能减少身体借力，适合学习垂直推举。",
+        equipment:"可调训练凳、哑铃", target:"前三角、中束；辅助：肱三头肌", level:"入门 / 中级", rest:"90–120秒",
+        setup:["训练凳靠背调到接近直立且舒适的角度。","双脚踩稳，核心收紧，哑铃位于肩部两侧。"],
+        steps:["呼气将哑铃向上推起，保持躯干稳定。","顶端不要用力撞击哑铃，也不需要过度耸肩。","吸气缓慢下放回肩部附近。"],
+        mistakes:["腰部过度后仰。","为了重量缩短动作范围。","手腕明显向后折。"],
+        progression:"若腰部无法稳定，先减重或使用有靠背的肩推器械。",
+        sourceName:"ACE Shoulder Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/body-part/shoulders/anterior-and-medial-deltoids%28delts%29/"
+      },
+      {
+        name:"哑铃侧平举", dose:"3–4组 × 10–15次", cue:"小重量、慢控制通常比甩更重的哑铃更适合侧平举。",
+        equipment:"哑铃", target:"三角肌中束", level:"入门", rest:"60–90秒",
+        setup:["双脚站稳，哑铃自然垂于身体两侧，肘部轻微弯曲。","肩胛保持稳定，不要刻意耸肩。"],
+        steps:["手臂向身体两侧抬起，保持轻微肘屈。","抬到舒适范围后停顿。","缓慢下放，不让哑铃自由坠落。"],
+        mistakes:["身体摆动借力。","耸肩代替三角肌发力。","重量过重导致动作完全变形。"],
+        progression:"优先增加稳定次数，再缓慢加重；也可使用绳索侧平举保持连续张力。",
+        sourceName:"ACE Shoulder Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/body-part/shoulders/"
+      },
+      {
+        name:"绳索面拉", dose:"3组 × 12–15次", cue:"重点是肩胛后缩和外旋，不是用腰部后仰拉重量。",
+        equipment:"龙门架、高位滑轮、绳索把手", target:"后三角、斜方肌中下束、肩袖", level:"入门", rest:"60–90秒",
+        setup:["滑轮设在面部附近高度，双手握住绳索两端。","站稳并保持躯干中立。"],
+        steps:["将绳索拉向面部，两肘向外打开。","末端让双手分开到面部两侧，感受肩胛后缩。","控制回程直到手臂伸直。"],
+        mistakes:["身体大幅后仰。","用过大重量导致动作变成划船。","耸肩、手肘位置过低。"],
+        progression:"先保持较高次数和动作质量，再逐步提高阻力。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      }
+    ]
+  },
+  {
+    id:"arms", name:"手臂", icon:"💪", desc:"肱二头肌、肱肌、肱三头肌与前臂", actions:[
+      {
+        name:"坐姿哑铃弯举", dose:"3组 × 8–12次", cue:"固定上臂，避免用腰和肩把哑铃甩起来。",
+        equipment:"有靠背训练凳、哑铃", target:"肱二头肌", level:"入门", rest:"60–90秒",
+        setup:["头、肩、臀部稳定贴住靠背，双脚踩稳。","手臂自然下垂，手腕保持中立。"],
+        steps:["呼气屈肘把哑铃抬向胸部。","上臂尽量保持稳定，不让肘明显前移。","吸气慢慢下放回起始位置。"],
+        mistakes:["后仰借力。","手腕弯折。","回程太快或肘部大幅向前跑。"],
+        progression:"当能稳定完成目标次数时再小幅加重，也可改为交替弯举或锤式弯举。",
+        sourceName:"ACE Seated Biceps Curl", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/44/seated-biceps-curl/"
+      },
+      {
+        name:"绳索下压", dose:"3组 × 10–15次", cue:"肘部固定在身体两侧，让前臂完成伸展。",
+        equipment:"龙门架 / 高位滑轮、绳索把手", target:"肱三头肌", level:"入门", rest:"60–90秒",
+        setup:["滑轮设在高位，握住绳索，双脚稳定站立。","肘部贴近躯干并保持在相对固定的位置。"],
+        steps:["呼气将绳索向下压，伸直肘关节。","底部可轻轻分开绳索两端。","吸气控制回到约90°屈肘位置。"],
+        mistakes:["肘部不断前后移动。","身体大幅前倾或下压时用体重压。","回程放任配重片弹起。"],
+        progression:"先保持肘固定，再增加阻力；也可换直杆或V杆改变手感。",
+        sourceName:"ACE Arm Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/body-part/arms/triceps/"
+      },
+      {
+        name:"锤式弯举", dose:"3组 × 10–12次", cue:"中立握法更强调肱肌与肱桡肌。",
+        equipment:"哑铃", target:"肱肌、肱桡肌、肱二头肌", level:"入门", rest:"60–90秒",
+        setup:["双脚站稳，手掌相对握住哑铃。","核心收紧，上臂贴近身体。"],
+        steps:["保持手掌相对，屈肘抬起哑铃。","顶部短暂停顿。","慢慢下放到手臂接近伸直。"],
+        mistakes:["身体摆动。","耸肩。","为了更高而让肘部明显向前移动。"],
+        progression:"可以采用交替方式提高控制，也可使用绳索锤式弯举。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      }
+    ]
+  },
+  {
+    id:"core", name:"核心", icon:"🧘", desc:"腹部、腰背和抗伸展/抗旋转能力", actions:[
+      {
+        name:"平板支撑", dose:"3组 × 20–60秒", cue:"质量优先，不需要为了时间让腰部塌下去。",
+        equipment:"瑜伽垫 / 无器械", target:"腹部、背部稳定肌群", level:"入门 / 中级", rest:"45–60秒",
+        setup:["俯卧，肘部放在肩部正下方，前臂贴地。","收紧腹部和腿部，让躯干形成稳定整体。"],
+        steps:["抬起身体，使头、躯干、髋和腿尽量保持一条直线。","自然呼吸，不耸肩。","在还能维持姿势时结束，不必坚持到动作崩溃。"],
+        mistakes:["塌腰或臀部过高。","憋气。","肩膀耸起、肘部离肩太远。"],
+        progression:"可先从膝撑版本开始，再延长时间或增加四点支撑变化。",
+        sourceName:"ACE Front Plank", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/"
+      },
+      {
+        name:"绳索抗旋转（Pallof Press）", dose:"3组 × 8–12次/侧", cue:"核心任务是抵抗旋转，而不是把重量推得很快。",
+        equipment:"龙门架 / 弹力带", target:"腹斜肌、腹横肌、躯干稳定", level:"入门", rest:"45–60秒",
+        setup:["滑轮调到胸口高度，身体侧对机器站立。","双手把把手抱在胸前，双脚站稳。"],
+        steps:["保持躯干正对前方，将双手缓慢向前推出。","抵抗绳索把身体拉向一侧的力量。","收回胸前并重复，完成后换另一侧。"],
+        mistakes:["身体跟着绳索旋转。","过度后仰。","阻力太大导致无法保持姿势。"],
+        progression:"可以加大与机器的距离或延长推出后的停顿时间。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      },
+      {
+        name:"死虫", dose:"3组 × 6–10次/侧", cue:"动作越慢越能检查腰背是否稳定。",
+        equipment:"瑜伽垫 / 无器械", target:"深层核心、髋部控制", level:"入门", rest:"45秒",
+        setup:["仰卧，髋膝约90°，双臂指向天花板。","收紧腹部，让腰背保持稳定。"],
+        steps:["缓慢伸出一侧腿和对侧手臂。","在腰背仍能稳定时达到最大范围。","回到起始位置后换边。"],
+        mistakes:["伸展时腰部明显拱起。","速度过快。","为了伸得更远牺牲核心稳定。"],
+        progression:"可增加停顿时间或手持轻重量，但前提是腰背保持稳定。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      }
+    ]
+  },
+  {
+    id:"glutes", name:"臀部", icon:"🍑", desc:"臀大肌、臀中肌及髋伸展能力", actions:[
+      {
+        name:"臀推 / 臀桥", dose:"3–4组 × 8–12次", cue:"顶端是髋伸展，不是用腰椎过度后仰。",
+        equipment:"臀推凳/平凳、杠铃和护垫；入门可徒手", target:"臀大肌；辅助：腘绳肌", level:"入门到中级", rest:"90–120秒",
+        setup:["肩胛下缘靠住卧凳边缘，双脚踩稳。","杠铃放在髋部并使用护垫，徒手版本可直接开始。"],
+        steps:["收紧核心并抬起髋部。","顶端让躯干与大腿接近一条直线，主动收紧臀部。","控制髋部下降，不让腰部承担主要动作。"],
+        mistakes:["顶端过度挺腰。","脚位太远或太近导致膝/腿后侧不适。","重量太大无法控制顶端。"],
+        progression:"先用徒手臀桥建立发力，再加杠铃或器械阻力。",
+        sourceName:"ACE Glute Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/body-part/butt-hips/gluteus-maximus%28glutes%29/"
+      },
+      {
+        name:"保加利亚分腿蹲", dose:"3组 × 8–10次/侧", cue:"单腿动作先从徒手开始，稳定比重量更重要。",
+        equipment:"平凳、哑铃（可选）", target:"臀肌、股四头肌", level:"中级", rest:"90秒",
+        setup:["后脚放在凳面，前脚站在足够远的位置。","躯干保持稳定，前脚完整踩地。"],
+        steps:["屈髋屈膝缓慢下降。","前膝方向与脚尖一致。","以前脚发力站起，保持身体平衡。"],
+        mistakes:["前脚距离过近导致膝盖压力明显增加。","左右摇晃。","一开始就使用过重哑铃。"],
+        progression:"徒手 → 轻哑铃 → 双手哑铃；也可增加底部停顿。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      },
+      {
+        name:"髋外展机", dose:"3组 × 12–20次", cue:"控制开合，不要用身体反复前后晃动。",
+        equipment:"坐姿髋外展机", target:"臀中肌、臀小肌", level:"入门", rest:"60秒",
+        setup:["调整座椅与腿垫，使双腿能舒适贴住护垫。","背部稳定贴住靠背，双手握住把手。"],
+        steps:["保持躯干稳定，将双腿向外打开。","末端短暂停顿。","缓慢回到起始位置，保持持续控制。"],
+        mistakes:["重量过大导致动作幅度很小。","身体前后摆动。","配重片撞击。"],
+        progression:"先提高控制和次数，再增加重量。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      }
+    ]
+  },
+  {
+    id:"fullbody", name:"全身", icon:"🤸", desc:"多关节综合训练，适合效率型训练日", actions:[
+      {
+        name:"高脚杯深蹲", dose:"3组 × 8–12次", cue:"比杠铃深蹲更容易学习躯干稳定和下蹲轨迹。",
+        equipment:"哑铃或壶铃", target:"腿部、臀部、核心", level:"入门", rest:"90秒",
+        setup:["双手抱住哑铃或壶铃靠近胸前。","双脚约肩宽或略宽，脚尖自然外展。"],
+        steps:["屈髋屈膝向下蹲，保持胸部抬起。","膝盖与脚尖方向一致。","脚掌蹬地站起，保持重量贴近身体。"],
+        mistakes:["脚跟抬起。","膝盖明显内扣。","重量远离身体导致躯干前倒。"],
+        progression:"先加次数，再加重量；技术成熟后可学习杠铃深蹲。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      },
+      {
+        name:"农夫行走", dose:"4组 × 30–45秒", cue:"看似简单，但核心是保持姿势和稳定步态。",
+        equipment:"两只哑铃或壶铃", target:"握力、肩带稳定、核心、下肢", level:"入门 / 中级", rest:"60–90秒",
+        setup:["两手各握一只重量相近的哑铃或壶铃。","身体直立，肩胛稳定，前方留出安全行走区域。"],
+        steps:["保持自然直立姿势向前走。","步幅保持稳定，正常呼吸。","时间结束后安全放下重量，不要直接扔落。"],
+        mistakes:["耸肩、身体左右大幅倾斜。","为了速度失去步态稳定。","在拥挤区域进行。"],
+        progression:"优先增加行走时间/距离，再增加重量。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      },
+      {
+        name:"壶铃摆动", dose:"4组 × 10–15次", cue:"属于髋主导爆发动作，新手先学髋铰链再练摆动。",
+        equipment:"壶铃", target:"臀部、腿后侧、核心；辅助：背部与握力", level:"中级", rest:"90秒",
+        setup:["壶铃放在身体前方，双脚略宽于髋。","先学习髋铰链，背部保持中立。"],
+        steps:["髋部向后，将壶铃带入双腿之间。","快速伸髋，让髋部力量把壶铃带到前方。","手臂只负责连接，不主动用肩抬举。"],
+        mistakes:["把动作做成深蹲。","用手臂把壶铃抬起来。","背部圆曲或失去核心稳定。"],
+        progression:"先用轻壶铃练技术，再增加重量和组数。",
+        sourceName:"ACE Exercise Library", sourceUrl:"https://www.acefitness.org/resources/everyone/exercise-library/"
+      }
+    ]
+  }
 ];
 
 const sportActivities: TrainingActivity[] = [
