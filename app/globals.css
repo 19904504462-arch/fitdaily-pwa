@@ -50,3 +50,8 @@ button{cursor:pointer}
 .color-picker-wrap input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .color-picker-wrap span{position:absolute;inset:6px;border-radius:11px;pointer-events:none}
 .reset-theme{width:100%;border:1px solid var(--pink-line);background:#fff;color:var(--pink);border-radius:14px;padding:11px;font-weight:700}
+
+.top-actions{display:flex;align-items:center;gap:8px}
+.theme-quick{width:40px;height:40px;border:1px solid var(--pink-line);border-radius:50%;background:#fff;color:var(--pink);font-size:18px;display:grid;place-items:center;box-shadow:var(--shadow)}
+.sheet-themes{margin-bottom:8px}
+.sheet-custom-bg{padding:8px 0 4px}
