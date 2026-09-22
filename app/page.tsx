@@ -983,64 +983,194 @@ function ExerciseTutorial({
   onBack:()=>void;
   onRecord:()=>void;
 }) {
+  const shortSteps=(action.steps || []).slice(0,3);
+  const shortMistakes=(action.mistakes || []).slice(0,3);
+
   return (
-    <div className="exercise-tutorial">
+    <div className="exercise-tutorial compact-tutorial">
       <button className="back-button" onClick={onBack}>← 返回{activity.name}</button>
 
-      <div className="tutorial-heading">
-        <div className="training-detail-icon">{activity.icon}</div>
-        <div>
-          <span className="tutorial-kicker">动作教程</span>
+      <div className="exercise-hero white-card">
+        <ExerciseVisual name={action.name} fallbackIcon={activity.icon} />
+        <div className="exercise-hero-copy">
+          <span>{activity.name} · 动作教程</span>
           <h2>{action.name}</h2>
-          <p>{action.target || activity.desc}</p>
+          <p>{action.cue}</p>
         </div>
       </div>
 
-      <div className="tutorial-meta">
-        <div><span>器械</span><b>{action.equipment || "按实际情况"}</b></div>
-        <div><span>难度</span><b>{action.level || "一般"}</b></div>
-        <div><span>建议训练</span><b>{action.dose}</b></div>
-        <div><span>组间休息</span><b>{action.rest || "按状态调整"}</b></div>
+      <div className="quick-facts">
+        <Fact icon="🏋️" label="器械" value={action.equipment || "无器械"} />
+        <Fact icon="🎯" label="部位" value={action.target || activity.desc} />
+        <Fact icon="🔁" label="训练" value={action.dose} />
+        <Fact icon="⏱️" label="休息" value={action.rest || "按状态"} />
       </div>
 
-      {action.setup?.length ? (
-        <TutorialSection icon="⚙️" title="器械怎么设置">
-          <ol>{action.setup.map((item,i)=><li key={i}>{item}</li>)}</ol>
-          <p className="machine-note">不同品牌器械结构可能不同，座椅、滑轮和限位位置应以设备铭牌与现场说明为准。</p>
-        </TutorialSection>
-      ) : null}
-
-      {action.steps?.length ? (
-        <TutorialSection icon="▶️" title="动作步骤">
-          <ol className="numbered-steps">{action.steps.map((item,i)=><li key={i}><span>{i+1}</span><p>{item}</p></li>)}</ol>
-        </TutorialSection>
-      ) : null}
-
-      <TutorialSection icon="🎯" title="训练要点">
-        <div className="cue-box">{action.cue}</div>
-        <div className="method-row"><span>建议训练量</span><b>{action.dose}</b></div>
-        <div className="method-row"><span>组间休息</span><b>{action.rest || "按训练目标调整"}</b></div>
-        {action.progression && <div className="progression-box"><b>如何进阶</b><p>{action.progression}</p></div>}
-      </TutorialSection>
-
-      {action.mistakes?.length ? (
-        <TutorialSection icon="⚠️" title="常见错误">
-          <ul className="mistake-list">{action.mistakes.map((item,i)=><li key={i}>{item}</li>)}</ul>
-        </TutorialSection>
-      ) : null}
-
-      {action.sourceName && action.sourceUrl && (
-        <a className="source-card white-card" href={action.sourceUrl} target="_blank" rel="noreferrer">
-          <div><span>专业参考来源</span><b>{action.sourceName}</b></div>
-          <strong>↗</strong>
-        </a>
+      {shortSteps.length > 0 && (
+        <section className="white-card compact-section">
+          <h3>动作怎么做</h3>
+          <div className="step-strip">
+            {shortSteps.map((item,i)=>(
+              <div className="step-item" key={i}>
+                <span>{i+1}</span>
+                <p>{shortenTutorialText(item)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
-      <div className="tutorial-safety">
-        出现尖锐疼痛、明显关节不适或无法保持动作控制时应停止该动作；有既往损伤或特殊健康情况时，先咨询合格的医疗或健身专业人员。
-      </div>
+      {shortMistakes.length > 0 && (
+        <section className="white-card compact-section">
+          <h3>⚠️ 注意这 3 点</h3>
+          <div className="mistake-chips">
+            {shortMistakes.map((item,i)=><span key={i}>{shortenTutorialText(item)}</span>)}
+          </div>
+        </section>
+      )}
 
-      <button className="primary-action" onClick={onRecord}>✓ 记录这次训练</button>
+      {(action.setup?.length || action.progression || action.sourceName) && (
+        <details className="white-card more-details">
+          <summary>更多专业说明</summary>
+          {action.setup?.length ? (
+            <div className="more-block">
+              <b>器械设置</b>
+              <ul>{action.setup.slice(0,3).map((item,i)=><li key={i}>{shortenTutorialText(item)}</li>)}</ul>
+            </div>
+          ) : null}
+          {action.progression ? (
+            <div className="more-block">
+              <b>如何进阶</b>
+              <p>{shortenTutorialText(action.progression)}</p>
+            </div>
+          ) : null}
+          {action.sourceName && action.sourceUrl ? (
+            <a className="compact-source" href={action.sourceUrl} target="_blank" rel="noreferrer">
+              参考：{action.sourceName} ↗
+            </a>
+          ) : null}
+        </details>
+      )}
+
+      <button className="primary-action tutorial-record" onClick={onRecord}>✓ 记录这次训练</button>
+    </div>
+  );
+}
+
+function Fact({icon,label,value}:{icon:string;label:string;value:string}) {
+  return (
+    <div className="fact-card">
+      <span className="fact-icon">{icon}</span>
+      <small>{label}</small>
+      <b>{value}</b>
+    </div>
+  );
+}
+
+function shortenTutorialText(text:string) {
+  const clean=text
+    .replace(/大重量时先设置安全杆或找保护者。?/g,"")
+    .replace(/具体以器械结构为准。?/g,"")
+    .trim();
+  if(clean.length<=34) return clean;
+  const first=clean.split(/[。；;]/)[0];
+  return first.length<=34 ? first : first.slice(0,32)+"…";
+}
+
+function ExerciseVisual({name,fallbackIcon}:{name:string;fallbackIcon:string}) {
+  if(name==="杠铃卧推"){
+    return (
+      <div className="exercise-visual bench-visual" aria-label="杠铃卧推动作示意图">
+        <svg viewBox="0 0 360 210" role="img">
+          <rect x="0" y="0" width="360" height="210" rx="24" className="visual-bg"/>
+          <rect x="78" y="144" width="215" height="16" rx="8" className="machine"/>
+          <rect x="118" y="158" width="12" height="30" rx="6" className="machine"/>
+          <rect x="254" y="158" width="12" height="30" rx="6" className="machine"/>
+          <circle cx="126" cy="115" r="17" className="skin"/>
+          <path d="M143 120 L220 124" className="body-line"/>
+          <path d="M178 124 L155 148" className="body-line"/>
+          <path d="M213 126 L242 150" className="body-line"/>
+          <path d="M159 118 L151 87" className="limb"/>
+          <path d="M207 120 L216 87" className="limb"/>
+          <line x1="116" y1="83" x2="247" y2="83" className="bar"/>
+          <rect x="104" y="69" width="10" height="28" rx="4" className="plate"/>
+          <rect x="249" y="69" width="10" height="28" rx="4" className="plate"/>
+          <path d="M52 55 L52 161 M52 55 L90 55 M309 55 L309 161 M271 55 L309 55" className="rack"/>
+          <path d="M152 83 L152 105 M216 83 L216 105" className="guide"/>
+          <text x="180" y="28" textAnchor="middle" className="visual-title">杠铃卧推</text>
+          <text x="180" y="197" textAnchor="middle" className="visual-caption">肩胛稳定 · 杠铃控制下放 · 平稳推起</text>
+        </svg>
+      </div>
+    );
+  }
+
+  if(name==="高位下拉"){
+    return (
+      <div className="exercise-visual pulldown-visual" aria-label="高位下拉动作示意图">
+        <svg viewBox="0 0 360 210" role="img">
+          <rect width="360" height="210" rx="24" className="visual-bg"/>
+          <path d="M66 42 L66 174 M294 42 L294 174 M66 42 L294 42" className="rack"/>
+          <line x1="180" y1="42" x2="180" y2="72" className="cable"/>
+          <line x1="122" y1="72" x2="238" y2="72" className="bar"/>
+          <circle cx="180" cy="111" r="16" className="skin"/>
+          <path d="M180 128 L180 167" className="body-line"/>
+          <path d="M180 136 L147 92 M180 136 L213 92" className="limb"/>
+          <path d="M180 167 L158 190 M180 167 L202 190" className="limb"/>
+          <rect x="137" y="174" width="86" height="10" rx="5" className="machine"/>
+          <path d="M147 92 L128 74 M213 92 L232 74" className="guide"/>
+          <text x="180" y="27" textAnchor="middle" className="visual-title">高位下拉</text>
+          <text x="180" y="201" textAnchor="middle" className="visual-caption">胸部抬起 · 肘向下 · 控制回程</text>
+        </svg>
+      </div>
+    );
+  }
+
+  if(name==="坐姿腿举"){
+    return (
+      <div className="exercise-visual legpress-visual" aria-label="腿举机动作示意图">
+        <svg viewBox="0 0 360 210" role="img">
+          <rect width="360" height="210" rx="24" className="visual-bg"/>
+          <path d="M72 158 L122 103 L157 103 L118 158 Z" className="machine-fill"/>
+          <rect x="118" y="140" width="93" height="15" rx="7" className="machine"/>
+          <path d="M268 52 L310 79 L257 166 L219 140 Z" className="machine-fill"/>
+          <circle cx="151" cy="104" r="15" className="skin"/>
+          <path d="M160 116 L193 139" className="body-line"/>
+          <path d="M191 139 L230 126 L268 103" className="limb"/>
+          <path d="M194 143 L232 147 L270 129" className="limb"/>
+          <path d="M270 99 L283 86 M270 130 L286 120" className="guide"/>
+          <text x="180" y="28" textAnchor="middle" className="visual-title">坐姿腿举</text>
+          <text x="180" y="197" textAnchor="middle" className="visual-caption">背部贴靠 · 脚掌踩稳 · 膝盖不过度锁死</text>
+        </svg>
+      </div>
+    );
+  }
+
+  if(name==="坐姿哑铃推举"){
+    return (
+      <div className="exercise-visual shoulderpress-visual" aria-label="哑铃推举动作示意图">
+        <svg viewBox="0 0 360 210" role="img">
+          <rect width="360" height="210" rx="24" className="visual-bg"/>
+          <rect x="147" y="93" width="66" height="88" rx="14" className="machine-fill"/>
+          <rect x="132" y="168" width="96" height="13" rx="6" className="machine"/>
+          <circle cx="180" cy="92" r="15" className="skin"/>
+          <path d="M180 107 L180 158" className="body-line"/>
+          <path d="M180 118 L145 99 L138 67" className="limb"/>
+          <path d="M180 118 L215 99 L222 67" className="limb"/>
+          <rect x="125" y="54" width="26" height="11" rx="5" className="dumbbell"/>
+          <rect x="209" y="54" width="26" height="11" rx="5" className="dumbbell"/>
+          <path d="M160 158 L150 188 M200 158 L210 188" className="limb"/>
+          <text x="180" y="27" textAnchor="middle" className="visual-title">哑铃推举</text>
+          <text x="180" y="201" textAnchor="middle" className="visual-caption">核心稳定 · 垂直推举 · 不过度后仰</text>
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    <div className="exercise-visual fallback-visual" aria-label={`${name}动作示意`}>
+      <div className="fallback-icon">{fallbackIcon}</div>
+      <b>{name}</b>
+      <span>动作示意图将在后续继续补充</span>
     </div>
   );
 }
