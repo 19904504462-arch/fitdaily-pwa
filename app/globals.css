@@ -100,3 +100,54 @@ button{cursor:pointer}
 .action-dose{font-size:10px;color:var(--pink);font-weight:800}
 .action-copy p{font-size:10px;color:var(--muted);line-height:1.5;margin:2px 0 0}
 .training-action-card>button{border:0;background:var(--pink);color:#fff;border-radius:999px;padding:8px 11px;font-size:10px;font-weight:800}
+
+.calendar-legend{display:flex;gap:16px;align-items:center;justify-content:center;margin-top:12px;color:var(--muted);font-size:10px}
+.calendar-legend span{display:flex;align-items:center;gap:6px}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.legend-dot.planned{background:var(--pink)}
+.legend-dot.done{background:var(--text)}
+
+.day{border:0;background:transparent;color:var(--text);cursor:pointer}
+.day:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.day.planned:not(.done){background:var(--pink-soft)}
+.day .plan-mark{position:absolute;right:4px;bottom:3px;min-width:14px;height:14px;padding:0 3px;border-radius:999px;background:var(--pink);color:#fff;font-size:8px;font-style:normal;display:grid;place-items:center}
+.day .done-mark{position:absolute;right:4px;top:3px;font-size:8px;font-style:normal}
+.day.done .plan-mark{background:#fff;color:var(--pink)}
+.day.done .done-mark{color:#fff}
+
+.day-plan-page{display:grid;gap:14px}
+.day-plan-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:2px}
+.day-plan-heading>div:first-child{min-width:0}
+.day-plan-heading span{font-size:10px;color:var(--pink);font-weight:800}
+.day-plan-heading h2{font-size:21px;line-height:1.25;margin:4px 0 5px;color:var(--text)}
+.day-plan-heading p{font-size:11px;line-height:1.5;color:var(--muted);margin:0}
+.day-plan-count{width:56px;height:56px;flex:0 0 56px;border-radius:18px;background:var(--pink-soft);display:grid;place-items:center;color:var(--pink);font-size:22px;font-weight:900}
+.day-plan-count small{display:block;font-size:9px;margin-top:-16px;font-weight:700}
+
+.day-plan-form-card{padding:16px}
+.day-plan-form-card h3{font-size:14px;margin:0 0 13px}
+.day-plan-form{display:grid;gap:12px}
+.time-range{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);gap:7px;align-items:end}
+.time-range label,.plan-field{display:grid;gap:6px;min-width:0}
+.time-range label>span,.plan-field>span{font-size:10px;color:var(--muted);font-weight:700}
+.time-range input,.plan-field input,.plan-field select{width:100%;min-width:0;border:1px solid var(--pink-line);background:#fff;border-radius:14px;padding:11px 12px;color:var(--text);outline:none;font-size:16px}
+.time-range input:focus,.plan-field input:focus,.plan-field select:focus{border-color:var(--pink);box-shadow:0 0 0 3px color-mix(in srgb,var(--pink) 12%, transparent)}
+.time-arrow{display:grid;place-items:center;height:43px;color:var(--muted)}
+.form-error{padding:9px 11px;border-radius:12px;background:#fff1f1;color:#a64e4e;font-size:10px}
+
+.day-plan-list-head{display:flex;justify-content:space-between;align-items:end;padding:2px}
+.day-plan-list-head h3{margin:0;font-size:15px}
+.day-plan-list-head span{font-size:10px;color:var(--muted)}
+.day-plan-list{display:grid;gap:9px}
+.day-plan-item{display:grid;grid-template-columns:62px minmax(0,1fr) 34px;gap:10px;align-items:center;padding:12px}
+.plan-time{display:grid;gap:2px;padding-right:10px;border-right:1px solid var(--pink-line)}
+.plan-time b{color:var(--pink);font-size:15px}
+.plan-time span{font-size:10px;color:var(--muted)}
+.plan-info{display:grid;gap:3px;min-width:0}
+.plan-info b{font-size:13px}
+.plan-info span{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-plan-item>button{width:32px;height:32px;border:0;border-radius:50%;background:var(--pink-soft);color:var(--pink);font-size:19px}
+.empty-plan{padding:24px 14px;text-align:center;display:grid;justify-items:center;gap:5px}
+.empty-plan>span{font-size:28px}
+.empty-plan b{font-size:13px}
+.empty-plan p{font-size:10px;color:var(--muted);margin:0}
