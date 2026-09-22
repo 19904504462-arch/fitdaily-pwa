@@ -10,14 +10,29 @@ type Checkin = {
   moves: number;
   note: string;
 };
+type ThemeState = {
+  preset: string;
+  background: string;
+};
+
 type AppState = {
   selectedParts: string[];
   foodKcal: number;
   checkins: Checkin[];
   schedule: { time: string; name: string }[];
+  theme: ThemeState;
 };
 
 const STORAGE_KEY = "fitdaily-pwa-v1";
+
+const themePresets = [
+  { id: "pink", name: "樱花粉", accent: "#ff6d98", accent2: "#ff87ab", background: "#fff7fa", soft: "#fff1f6" },
+  { id: "lavender", name: "薰衣草", accent: "#8d78e8", accent2: "#aa98f2", background: "#f8f5ff", soft: "#f1edff" },
+  { id: "mint", name: "薄荷绿", accent: "#46aa89", accent2: "#69c5a7", background: "#f3fbf8", soft: "#eaf8f3" },
+  { id: "peach", name: "蜜桃橙", accent: "#f28b69", accent2: "#f5aa8f", background: "#fff7f2", soft: "#fff0e8" },
+  { id: "sky", name: "晴空蓝", accent: "#5f9eea", accent2: "#83b7f2", background: "#f4f9ff", soft: "#eaf4ff" },
+  { id: "mono", name: "奶油灰", accent: "#66636d", accent2: "#89858f", background: "#f8f7f5", soft: "#f0eeeb" },
+] as const;
 const bodyParts = [
   ["胸部", "🏋️"], ["背部", "🧍"], ["腿部", "🦵"],
   ["肩部", "🙋"], ["手臂", "💪"], ["核心", "🧘"],
@@ -36,6 +51,7 @@ const initialState: AppState = {
   foodKcal: 0,
   checkins: [],
   schedule: [{ time: "08:00", name: "晨跑 🏃" }],
+  theme: { preset: "pink", background: "#fff7fa" },
 };
 
 function dateKey(d = new Date()) {
@@ -67,7 +83,14 @@ export default function Home() {
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      try { setState(JSON.parse(raw)); } catch {}
+      try {
+        const saved = JSON.parse(raw);
+        setState({
+          ...initialState,
+          ...saved,
+          theme: { ...initialState.theme, ...(saved.theme || {}) },
+        });
+      } catch {}
     }
     setHydrated(true);
 
@@ -86,6 +109,15 @@ export default function Home() {
   useEffect(() => {
     if (hydrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state, hydrated]);
+
+  useEffect(() => {
+    const preset = themePresets.find(x => x.id === state.theme.preset) || themePresets[0];
+    const root = document.documentElement;
+    root.style.setProperty("--pink", preset.accent);
+    root.style.setProperty("--pink2", preset.accent2);
+    root.style.setProperty("--page-bg", state.theme.background || preset.background);
+    root.style.setProperty("--page-bg2", preset.soft);
+  }, [state.theme]);
 
   const today = dateKey();
   const todayCheckin = state.checkins.find(x => x.date === today);
@@ -277,6 +309,57 @@ export default function Home() {
               <div><b>添加到手机桌面</b><span>安装后打开更像原生 App</span></div>
               <strong>›</strong>
             </button>
+
+            <SectionTitle icon="🎨" title="主题与背景" />
+            <div className="white-card theme-panel">
+              <div className="theme-copy">
+                <b>快速主题</b>
+                <span>选择一套配色，或单独自定义页面背景。</span>
+              </div>
+              <div className="theme-presets">
+                {themePresets.map(theme => (
+                  <button
+                    key={theme.id}
+                    className={`theme-option ${state.theme.preset === theme.id ? "active" : ""}`}
+                    onClick={() => setState(s => ({
+                      ...s,
+                      theme: { preset: theme.id, background: theme.background }
+                    }))}
+                    aria-label={theme.name}
+                    title={theme.name}
+                  >
+                    <span className="theme-swatch" style={{ background: theme.accent }} />
+                    <small>{theme.name}</small>
+                  </button>
+                ))}
+              </div>
+              <div className="custom-bg-row">
+                <div>
+                  <b>自定义背景</b>
+                  <span>点击色块选择任意颜色</span>
+                </div>
+                <label className="color-picker-wrap">
+                  <input
+                    type="color"
+                    value={state.theme.background}
+                    onChange={e => setState(s => ({
+                      ...s,
+                      theme: { ...s.theme, background: e.target.value }
+                    }))}
+                  />
+                  <span style={{ background: state.theme.background }} />
+                </label>
+              </div>
+              <button
+                className="reset-theme"
+                onClick={() => setState(s => ({
+                  ...s,
+                  theme: { ...initialState.theme }
+                }))}
+              >
+                恢复默认粉色
+              </button>
+            </div>
 
             <SectionTitle icon="🏋️" title="常用器械指南" />
             <div className="equipment-list">
