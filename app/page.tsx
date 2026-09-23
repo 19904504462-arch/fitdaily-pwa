@@ -911,19 +911,20 @@ function NavItem({icon,label,active,onClick}:{icon:string;label:string;active:bo
   return <button className={active ? "nav active" : "nav"} onClick={onClick}><span>{icon}</span><small>{label}</small></button>
 }
 function getExerciseImage(name:string) {
+  const base=process.env.NEXT_PUBLIC_BASE_PATH || "";
   const images:Record<string,string> = {
-    "杠铃卧推": "https://images.pexels.com/photos/3916762/pexels-photo-3916762.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "蝴蝶机夹胸": "https://images.pexels.com/photos/3838937/pexels-photo-3838937.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "绳索夹胸": "https://images.pexels.com/photos/32695897/pexels-photo-32695897.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "高位下拉": "https://images.pexels.com/photos/29218860/pexels-photo-29218860.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "坐姿绳索划船": "https://images.pexels.com/photos/4162482/pexels-photo-4162482.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "胸托划船机": "https://images.pexels.com/photos/11876626/pexels-photo-11876626.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "坐姿腿举": "https://images.pexels.com/photos/37570727/pexels-photo-37570727.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "杠铃深蹲": "https://images.pexels.com/photos/32521594/pexels-photo-32521594.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "罗马尼亚硬拉": "https://images.pexels.com/photos/14591531/pexels-photo-14591531.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "坐姿哑铃推举": "https://images.pexels.com/photos/7289236/pexels-photo-7289236.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "哑铃侧平举": "https://images.pexels.com/photos/29793977/pexels-photo-29793977.jpeg?auto=compress&cs=tinysrgb&w=1000",
-    "绳索面拉": "https://images.pexels.com/photos/29825230/pexels-photo-29825230.jpeg?auto=compress&cs=tinysrgb&w=1000"
+    "杠铃卧推": `${base}/images/training/chest/bench-press.jpg`,
+    "蝴蝶机夹胸": `${base}/images/training/chest/pec-deck.jpg`,
+    "绳索夹胸": `${base}/images/training/chest/cable-fly.jpg`,
+    "高位下拉": `${base}/images/training/back/lat-pulldown.jpg`,
+    "坐姿绳索划船": `${base}/images/training/back/seated-row.webp`,
+    "胸托划船机": `${base}/images/training/back/chest-supported-row.webp`,
+    "坐姿腿举": `${base}/images/training/legs/leg-press.png`,
+    "杠铃深蹲": `${base}/images/training/legs/squat.png`,
+    "罗马尼亚硬拉": `${base}/images/training/legs/romanian-deadlift.png`,
+    "坐姿哑铃推举": `${base}/images/training/shoulders/shoulder-press.png`,
+    "哑铃侧平举": `${base}/images/training/shoulders/lateral-raise.jpg`,
+    "绳索面拉": `${base}/images/training/shoulders/face-pull.svg`
   };
   return images[name] || null;
 }
