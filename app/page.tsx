@@ -1,18 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import benchPressImage from "./training-images/bench-press";
-import pecDeckImage from "./training-images/pec-deck";
-import cableFlyImage from "./training-images/cable-fly";
-import latPulldownImage from "./training-images/lat-pulldown";
-import seatedRowImage from "./training-images/seated-row";
-import chestSupportedRowImage from "./training-images/chest-supported-row";
-import legPressImage from "./training-images/leg-press";
-import squatImage from "./training-images/squat";
-import romanianDeadliftImage from "./training-images/romanian-deadlift";
-import shoulderPressImage from "./training-images/shoulder-press";
-import lateralRaiseImage from "./training-images/lateral-raise";
-import facePullImage from "./training-images/face-pull";
 
 
 type Tab = "home" | "train" | "calendar" | "food" | "profile";
@@ -924,20 +912,32 @@ function NavItem({icon,label,active,onClick}:{icon:string;label:string;active:bo
 }
 function getExerciseImage(name:string) {
   const images:Record<string,string> = {
-    "杠铃卧推": benchPressImage,
-    "蝴蝶机夹胸": pecDeckImage,
-    "绳索夹胸": cableFlyImage,
-    "高位下拉": latPulldownImage,
-    "坐姿绳索划船": seatedRowImage,
-    "胸托划船机": chestSupportedRowImage,
-    "坐姿腿举": legPressImage,
-    "杠铃深蹲": squatImage,
-    "罗马尼亚硬拉": romanianDeadliftImage,
-    "坐姿哑铃推举": shoulderPressImage,
-    "哑铃侧平举": lateralRaiseImage,
-    "绳索面拉": facePullImage
+    "杠铃卧推": "https://images.pexels.com/photos/3916762/pexels-photo-3916762.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "蝴蝶机夹胸": "https://images.pexels.com/photos/3838937/pexels-photo-3838937.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "绳索夹胸": "https://images.pexels.com/photos/32695897/pexels-photo-32695897.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "高位下拉": "https://images.pexels.com/photos/29218860/pexels-photo-29218860.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "坐姿绳索划船": "https://images.pexels.com/photos/4162482/pexels-photo-4162482.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "胸托划船机": "https://images.pexels.com/photos/11876626/pexels-photo-11876626.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "坐姿腿举": "https://images.pexels.com/photos/37570727/pexels-photo-37570727.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "杠铃深蹲": "https://images.pexels.com/photos/32521594/pexels-photo-32521594.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "罗马尼亚硬拉": "https://images.pexels.com/photos/14591531/pexels-photo-14591531.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "坐姿哑铃推举": "https://images.pexels.com/photos/7289236/pexels-photo-7289236.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "哑铃侧平举": "https://images.pexels.com/photos/29793977/pexels-photo-29793977.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    "绳索面拉": "https://images.pexels.com/photos/29825230/pexels-photo-29825230.jpeg?auto=compress&cs=tinysrgb&w=1000"
   };
   return images[name] || null;
+}
+
+function getExerciseFallback(name:string) {
+  const safe=name.replace(/[<>&"']/g,"");
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
+    <rect width="900" height="620" rx="36" fill="#f5f1f3"/>
+    <circle cx="450" cy="250" r="92" fill="#eadfe4"/>
+    <text x="450" y="278" text-anchor="middle" font-size="86">🏋️</text>
+    <text x="450" y="405" text-anchor="middle" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="44" font-weight="700" fill="#3d3740">${safe}</text>
+    <text x="450" y="465" text-anchor="middle" font-family="Arial,'Microsoft YaHei',sans-serif" font-size="24" fill="#847982">图片加载失败，点击仍可查看动作教程</text>
+  </svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
 function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;onBack:()=>void;onRecord:(activity:TrainingActivity,action:TrainingAction)=>void}) {
@@ -977,7 +977,7 @@ function TrainingDetail({activity,onBack,onRecord}:{activity:TrainingActivity;on
             >
               <div className="equipment-card-media">
                 {image ? (
-                  <img src={image} alt={action.name} loading="lazy" />
+                  <img src={image} alt={action.name} loading="lazy" referrerPolicy="no-referrer" onError={(e)=>{ const el=e.currentTarget; el.onerror=null; el.src=getExerciseFallback(action.name); }} />
                 ) : (
                   <div className="equipment-card-placeholder">
                     <span>{activity.icon}</span>
@@ -1113,7 +1113,7 @@ function ExerciseVisual({name,fallbackIcon}:{name:string;fallbackIcon:string}) {
   if(image){
     return (
       <div className="exercise-photo-single">
-        <img src={image} alt={name} loading="eager" />
+        <img src={image} alt={name} loading="eager" referrerPolicy="no-referrer" onError={(e)=>{ const el=e.currentTarget; el.onerror=null; el.src=getExerciseFallback(name); }} />
         <span className="photo-label">器材与使用姿势</span>
       </div>
     );
