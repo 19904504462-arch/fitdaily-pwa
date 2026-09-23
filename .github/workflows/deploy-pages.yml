@@ -55,7 +55,7 @@ jobs:
           fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Romanian-deadlift-1.png" "public/images/training/legs/romanian-deadlift.png"
           fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Dumbbell-shoulder-press-1.png" "public/images/training/shoulders/shoulder-press.png"
           fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/DumbbellLateralRaise.JPG" "public/images/training/shoulders/lateral-raise.jpg"
-          fetch_img "https://cdn.jsdelivr.net/npm/@bryllim/workout-guide@1.0.0/assets/face-pull/frame-1.svg" "public/images/training/shoulders/face-pull.svg"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Cable-upright-rows-1.png" "public/images/training/shoulders/face-pull.png"
 
           node <<'NODE'
           const fs=require("fs");
