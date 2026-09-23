@@ -924,7 +924,7 @@ function getExerciseImage(name:string) {
     "罗马尼亚硬拉": `${base}/images/training/legs/romanian-deadlift.png`,
     "坐姿哑铃推举": `${base}/images/training/shoulders/shoulder-press.png`,
     "哑铃侧平举": `${base}/images/training/shoulders/lateral-raise.jpg`,
-    "绳索面拉": `${base}/images/training/shoulders/face-pull.svg`
+    "绳索面拉": `${base}/images/training/shoulders/face-pull.png`
   };
   return images[name] || null;
 }
