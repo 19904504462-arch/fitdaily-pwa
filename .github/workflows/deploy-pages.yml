@@ -30,6 +30,53 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Prepare training images
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/images/training/chest public/images/training/back public/images/training/legs public/images/training/shoulders
+
+          ua="FitDaily GitHub Pages build"
+
+          fetch_img() {
+            url="$1"
+            out="$2"
+            echo "Downloading $out"
+            curl -L --fail --retry 4 --retry-delay 2 -A "$ua" "$url" -o "$out"
+            test -s "$out"
+          }
+
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Barbells.jpg?width=1200" "public/images/training/chest/bench-press.jpg"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Pec%20deck%20Fly.jpg?width=1000" "public/images/training/chest/pec-deck.jpg"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Chest%20flies%20with%20cable%20machine%20-%20cable%20crossover%20flies.jpg?width=1200" "public/images/training/chest/cable-fly.jpg"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Amer-Lat-Pulldown.jpg?width=1000" "public/images/training/back/lat-pulldown.jpg"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Leg-press-1-1024x670.png" "public/images/training/legs/leg-press.png"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Squats-2.png" "public/images/training/legs/squat.png"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Romanian-deadlift-1.png" "public/images/training/legs/romanian-deadlift.png"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/Dumbbell-shoulder-press-1.png" "public/images/training/shoulders/shoulder-press.png"
+          fetch_img "https://commons.wikimedia.org/wiki/Special:FilePath/DumbbellLateralRaise.JPG" "public/images/training/shoulders/lateral-raise.jpg"
+          fetch_img "https://cdn.jsdelivr.net/npm/@bryllim/workout-guide@1.0.0/assets/face-pull/frame-2.svg" "public/images/training/shoulders/face-pull.svg"
+
+          node <<'NODE'
+          const fs=require("fs");
+          for (const [src,dst] of [
+            ["app/training-images/seated-row.ts","public/images/training/back/seated-row.webp"],
+            ["app/training-images/chest-supported-row.ts","public/images/training/back/chest-supported-row.webp"]
+          ]) {
+            const text=fs.readFileSync(src,"utf8");
+            const match=text.match(/base64,([^"]+)/);
+            if (!match) throw new Error("Missing embedded image in "+src);
+            const buf=Buffer.from(match[1],"base64");
+            if (buf.slice(0,4).toString()!=="RIFF" || buf.slice(8,12).toString()!=="WEBP") {
+              throw new Error("Invalid WEBP in "+src);
+            }
+            fs.writeFileSync(dst,buf);
+          }
+          NODE
+
+          echo "Prepared training images:"
+          find public/images/training -type f -maxdepth 3 -printf '%p %s bytes\n'
+
       - name: Build static site
         run: npm run build
         env:
